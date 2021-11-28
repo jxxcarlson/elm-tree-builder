@@ -1,23 +1,41 @@
-module Tree.Build exposing (InitialData, fromBlocks)
+module Tree.Build exposing (InitialData, fromBlocks, fromString)
 
 {-|
 
-    > s = "a\n b\n  c\n  d\n x"
-    "a\n b\n  c\n  d\n x" : String
-
-    > t = build 1 s
-    Tree "root" [Tree "a" [Tree "b" [Tree "c" [],Tree "d" []],Tree "x" []]] : Tree.Tree String
-
-    > render t
-    "a\n b\n  c\n  d\n x" : String
+    Module Tree.Build provides tools for building a tree from a string.
 
 -}
 
+--
+--> s = "a\n b\n  c\n  d\n x"
+--"a\n b\n  c\n  d\n x" : String
+--
+--> t = build 1 s
+--Tree "root" [Tree "a" [Tree "b" [Tree "c" [],Tree "d" []],Tree "x" []]] : Tree.Tree String
+--
+--> render t
+--"a\n b\n  c\n  d\n x" : String
+
 import Tree exposing (Tree(..))
-import Tree.Block exposing (Block)
+import Tree.Blocks as Block exposing (Block)
 import Tree.Zipper as Zipper exposing (Zipper(..))
 
 
+{-| StringTreeTest 1: Trees whose nodes are labeled by strings
+
+  - quant = 2 (indentation is a multiple of quant)
+  - defaultNode = "?"
+  - rootNode = "root"
+  - makeNode = identity
+
+StringTreeTest 2: Trees whose nodes lists of strings
+
+  - quant = 1
+  - defaultNode == [ ]
+  - rootNode = [ ]
+  - makeNode = String.split ","
+
+-}
 type alias InitialData node =
     { quant : Int
     , defaultNode : node
@@ -38,9 +56,17 @@ init initialData blocks =
     }
 
 
+{-| -}
 fromBlocks : InitialData node -> List Block -> Tree node
 fromBlocks initialData blocks =
     loop (init initialData blocks) nextStep
+
+
+fromString : InitialData node -> String -> Tree node
+fromString initialData str =
+    str
+        |> Block.fromString
+        |> fromBlocks initialData
 
 
 

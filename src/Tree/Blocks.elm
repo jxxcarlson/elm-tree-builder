@@ -1,4 +1,4 @@
-module Tree.Block exposing (Block, blocksAsLines, make)
+module Tree.Blocks exposing (Block, fromString, make)
 
 import Tree.Line as Line
 
@@ -9,9 +9,10 @@ type alias Block =
     }
 
 
-blocksAsLines : String -> List Block
-blocksAsLines str =
+fromString : String -> List Block
+fromString str =
     str
+        |> String.trim
         |> String.lines
         |> List.map (\line -> Line.classify line)
 
