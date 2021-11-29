@@ -16,16 +16,40 @@ testItem quantum label str =
             Lib.forestTest quantum "?" identity identity str |> Expect.equal "Ok"
 
 
+testForestNumber : Int -> String -> String -> Test
+testForestNumber expectedNumber label str =
+    test label <|
+        \_ ->
+            Build.forestFromString "?" identity identity str |> Debug.log "FOREST" |> Result.map List.length |> Expect.equal (Ok expectedNumber)
+
+
 suite : Test
 suite =
-    Test.only <|
-        describe "The Build module"
-            [ testItem 1 "A" a
-            , testItem 1 "B" b
+    describe "building and rendering forests"
+        [ testItem 1 "X" x
+        , testForestNumber 2 "X'" x
+        , testItem 1 "A" a
+        , testItem 1 "B" b
+        , testForestNumber 2 "B'" b
+        , testItem 1 "C" c
+        , testForestNumber 2 "C'" c
+        , Test.skip <| testItem 2 "AA" aa
+        , Test.skip <| testForestNumber 2 "AA'" aa
+        ]
 
-            --, testItem "C" c
-            --, testItem "D" d
-            ]
+
+x =
+    """
+1
+ a
+ b
+  i
+  j
+  k
+2
+ c
+ d
+"""
 
 
 a =
@@ -49,6 +73,32 @@ b =
 6
  7
  8
+"""
+
+
+c =
+    """
+1
+ 2
+  3
+   4
+   5
+ 6
+ 7
+8
+ 9
+ 10
+"""
+
+
+aa =
+    """
+1
+  2
+  3
+4
+  5
+  6
 """
 
 
