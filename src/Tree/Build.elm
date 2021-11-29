@@ -61,8 +61,8 @@ type Error
     | BlocksNotWellFormed
 
 
-init : InitialData node -> List Block -> Result Error (State node)
-init initialData blocks =
+init : node -> (String -> node) -> List Block -> Result Error (State node)
+init defaultNode makeNode blocks =
     case List.head blocks of
         Nothing ->
             Err EmptyBlocks
@@ -78,12 +78,12 @@ init initialData blocks =
             else
                 Ok
                     { blocks = List.drop 1 blocks
-                    , zipper = Zipper.fromTree <| Tree.tree (initialData.makeNode rootBlock.content) []
+                    , zipper = Zipper.fromTree <| Tree.tree (makeNode rootBlock.content) []
                     , indentationQuantum = quantum
                     , indent = 0
                     , level = 0
-                    , make = initialData.makeNode
-                    , default = Zipper.fromTree (Tree.tree initialData.defaultNode [])
+                    , make = makeNode
+                    , default = Zipper.fromTree (Tree.tree defaultNode [])
                     }
 
 
@@ -99,9 +99,9 @@ type alias State node =
 
 
 {-| -}
-fromBlocks : InitialData node -> List Block -> Result Error (Tree node)
-fromBlocks initialData blocks =
-    case init initialData blocks of
+fromBlocks : node -> (String -> node) -> List Block -> Result Error (Tree node)
+fromBlocks defaultNode makeNode blocks =
+    case init defaultNode makeNode blocks of
         Err error ->
             Err error
 
@@ -110,11 +110,11 @@ fromBlocks initialData blocks =
 
 
 {-| -}
-fromString : InitialData node -> String -> Result Error (Tree node)
-fromString initialData str =
+fromString : node -> (String -> node) -> String -> Result Error (Tree node)
+fromString defaultNode makeNode str =
     str
         |> Block.fromString
-        |> fromBlocks initialData
+        |> fromBlocks defaultNode makeNode
 
 
 
