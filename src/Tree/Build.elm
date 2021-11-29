@@ -1,39 +1,50 @@
-module Tree.Build exposing (InitialData, fromBlocks, fromString)
+module Tree.Build exposing (fromString, fromBlocks, InitialData)
 
 {-|
 
-    Module Tree.Build provides tools for building a tree from a string.
+    This module provides tools for building
+    a tree from a string or a list of blocks.
+
+    Example:
+
+        > initialData =
+            { quant = 1
+            , defaultNode = "?"
+            , rootNode = "0"
+            , makeNode = identity
+            }
+
+        > data = "1\n 2\n 3\n 4\n5\n 6\n 7"
+
+        > fromString initialData data
+          Tree "0" [
+                Tree "1" [Tree "2" [],Tree "3" [], Tree "4" []]
+              , Tree "5" [Tree "6" [],Tree "7" []]
+              ]
+
+@docs fromString, fromBlocks, InitialData
 
 -}
-
---
---> s = "a\n b\n  c\n  d\n x"
---"a\n b\n  c\n  d\n x" : String
---
---> t = build 1 s
---Tree "root" [Tree "a" [Tree "b" [Tree "c" [],Tree "d" []],Tree "x" []]] : Tree.Tree String
---
---> render t
---"a\n b\n  c\n  d\n x" : String
 
 import Tree exposing (Tree(..))
 import Tree.Blocks as Block exposing (Block)
 import Tree.Zipper as Zipper exposing (Zipper(..))
 
 
-{-| StringTreeTest 1: Trees whose nodes are labeled by strings
+{-| Example for trees whose nodes labeled by lists of Ints:
 
-  - quant = 2 (indentation is a multiple of quant)
-  - defaultNode = "?"
-  - rootNode = "root"
-  - makeNode = identity
+    initialData =
+        { quant = 2
+        , defaultNode = []
+        , rootNode = [ 0 ]
+        , makeNode = identity
+        }
 
-StringTreeTest 2: Trees whose nodes lists of strings
-
-  - quant = 1
-  - defaultNode == [ ]
-  - rootNode = [ ]
-  - makeNode = String.split ","
+    makeNode : String -> List Int
+    makeNode content =
+        content
+            |> String.split ","
+            |> List.map (\s -> String.toInt s |> Maybe.withDefault 0)
 
 -}
 type alias InitialData node =
@@ -62,6 +73,7 @@ fromBlocks initialData blocks =
     loop (init initialData blocks) nextStep
 
 
+{-| -}
 fromString : InitialData node -> String -> Tree node
 fromString initialData str =
     str
