@@ -24,9 +24,7 @@ fuzzTest nodes label =
 
 initialData : InitialData String
 initialData =
-    { quant = 1
-    , defaultNode = "?"
-    , rootNode = "root"
+    { defaultNode = "?"
     , makeNode = identity
     }
 

@@ -24,9 +24,7 @@ fuzzTest nodes label =
 
 initialData : Int -> InitialData (List Int)
 initialData quant =
-    { quant = quant
-    , defaultNode = []
-    , rootNode = []
+    { defaultNode = []
     , makeNode = makeNode
     }
 

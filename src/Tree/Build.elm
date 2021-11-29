@@ -63,13 +63,6 @@ type Error
 
 init : InitialData node -> List Block -> Result Error (State node)
 init initialData blocks =
-    let
-        foo =
-            1
-
-        --_ =
-        --    Debug.log "BLOCKS" blocks
-    in
     case List.head blocks of
         Nothing ->
             Err EmptyBlocks
@@ -78,9 +71,6 @@ init initialData blocks =
             let
                 ( quantum, wellFormed ) =
                     Block.wellFormed blocks
-
-                _ =
-                    Debug.log "rootBlock" rootBlock
             in
             if wellFormed == False then
                 Err BlocksNotWellFormed
@@ -88,7 +78,7 @@ init initialData blocks =
             else
                 Ok
                     { blocks = List.drop 1 blocks
-                    , zipper = (Zipper.fromTree <| (Tree.tree (initialData.makeNode rootBlock.content) [] |> Debug.log "ROOT")) |> Debug.log "ZIPPER"
+                    , zipper = Zipper.fromTree <| Tree.tree (initialData.makeNode rootBlock.content) []
                     , indentationQuantum = quantum
                     , indent = 0
                     , level = 0
@@ -133,13 +123,6 @@ fromString initialData str =
 
 nextStep : State node -> Step (State node) (Tree node)
 nextStep state =
-    let
-        foo =
-            1
-
-        --_ =
-        --    Debug.log "STATE" state
-    in
     case List.head state.blocks of
         Nothing ->
             Done (Zipper.toTree state.zipper)
