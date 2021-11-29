@@ -21,7 +21,7 @@ test : Int -> (node -> String) -> InitialData node -> String -> String
 test quantum renderNode initialData str =
     let
         maybeStr2 =
-            Tree.Build.fromString initialData str |> Maybe.map (toString quantum renderNode)
+            Tree.Build.fromString initialData str |> Result.toMaybe |> Maybe.map (toString quantum renderNode)
     in
     if Just str == maybeStr2 then
         "Ok"
