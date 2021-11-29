@@ -20,24 +20,18 @@ module Tree.Example.String exposing (..)
 -}
 
 import Tree.Blocks as Blocks
-import Tree.Build as Build exposing (InitialData)
+import Tree.Build as Build
 import Tree.Lib as Lib
 import Tree.Random
 
 
 r maxCount seed =
-    Lib.test 1 identity initialData (Tree.Random.generateOutline maxCount seed)
+    Lib.test 1 "?" identity identity (Tree.Random.generateOutline maxCount seed)
 
 
-initialData : InitialData String
-initialData =
-    { defaultNode = "?"
-    , makeNode = identity
-    }
 
-
-b stuff =
-    Build.fromString initialData stuff
+--b stuff =
+--    Build.fromString initialData stuff
 
 
 {-|
@@ -47,7 +41,7 @@ b stuff =
 
 -}
 tree =
-    Build.fromString initialData data
+    Build.fromString "?" identity data
 
 
 f maxCount seed =
@@ -58,11 +52,11 @@ f maxCount seed =
         ( quantum, _ ) =
             outline |> Blocks.fromString |> Blocks.wellFormed
     in
-    Lib.test quantum identity initialData outline
+    Lib.test 1 "?" identity identity outline
 
 
 testResult =
-    Lib.test 1 identity initialData data
+    Lib.test 1 "?" identity identity data
 
 
 data =
