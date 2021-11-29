@@ -64,8 +64,11 @@ type Error
 init : InitialData node -> List Block -> Result Error (State node)
 init initialData blocks =
     let
-        _ =
-            Debug.log "BLOCKS" blocks
+        foo =
+            1
+
+        --_ =
+        --    Debug.log "BLOCKS" blocks
     in
     case List.head blocks of
         Nothing ->
@@ -131,8 +134,11 @@ fromString initialData str =
 nextStep : State node -> Step (State node) (Tree node)
 nextStep state =
     let
-        _ =
-            Debug.log "STATE" state
+        foo =
+            1
+
+        --_ =
+        --    Debug.log "STATE" state
     in
     case List.head state.blocks of
         Nothing ->
@@ -186,12 +192,23 @@ handleGT indent content state =
         newTree =
             Tree.tree (state.make content) []
     in
-    { state
-        | blocks = List.drop 1 state.blocks
-        , indent = indent
-        , level = state.level + 1
-        , zipper = attachAtFocus newTree (Zipper.lastChild state.zipper |> Maybe.withDefault state.default)
-    }
+    case Zipper.lastChild state.zipper of
+        Nothing ->
+            -- This is the case for the first node of the tree after the root
+            { state
+                | blocks = List.drop 1 state.blocks
+                , indent = indent
+                , level = state.level + 1
+                , zipper = attachAtFocus newTree state.zipper
+            }
+
+        Just newZipper ->
+            { state
+                | blocks = List.drop 1 state.blocks
+                , indent = indent
+                , level = state.level + 1
+                , zipper = attachAtFocus newTree newZipper
+            }
 
 
 handleLT indent content state =
