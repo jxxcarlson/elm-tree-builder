@@ -90,8 +90,17 @@ nextStep state =
             ( move, seed ) =
                 rng state.indent state.seed
 
+            indentaAfterRoot =
+                -- After the root, indentation must be at least 1 and cannot be one more
+                -- than the previous indentation
+                state.indent + valueOf move |> (\x -> clamp 1 (state.indent + 1) x)
+
             indent =
-                state.indent + valueOf move |> (\x -> clamp 0 (state.indent + 1) x)
+                if state.count == 1 then
+                    0
+
+                else
+                    indentaAfterRoot
 
             str =
                 String.repeat indent " " ++ String.fromInt state.count

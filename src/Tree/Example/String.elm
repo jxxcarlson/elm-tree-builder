@@ -19,6 +19,7 @@ module Tree.Example.String exposing (..)
 
 -}
 
+import Tree.Blocks as Blocks
 import Tree.Build as Build exposing (InitialData)
 import Tree.Random
 import Tree.Render as Render
@@ -47,6 +48,17 @@ b stuff =
 -}
 tree =
     Build.fromString initialData data
+
+
+f maxCount seed =
+    let
+        outline =
+            Tree.Random.generateOutline maxCount seed
+
+        ( quantum, _ ) =
+            outline |> Blocks.fromString |> Blocks.wellFormed
+    in
+    Render.test quantum identity initialData outline
 
 
 testResult =
