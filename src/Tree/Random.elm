@@ -3,7 +3,7 @@ module Tree.Random exposing (depths, generate, generateOutline)
 import List.Extra
 import Random
 import Tree exposing (Tree)
-import Tree.Build as Build exposing (Error, InitialData)
+import Tree.Build as Build exposing (Error)
 import Tree.Extra
 
 
@@ -11,7 +11,7 @@ import Tree.Extra
 generate : Int -> Int -> Result Error (Tree String)
 generate maxCount seed =
     generateOutline maxCount seed
-        |> Build.fromString initialData
+        |> Build.fromString "?" identity
 
 
 generateOutline : Int -> Int -> String

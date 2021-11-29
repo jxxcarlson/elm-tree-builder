@@ -3,7 +3,6 @@ module ListTreeTest exposing (..)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer)
 import Test exposing (..)
-import Tree.Build exposing (InitialData)
 import Tree.Lib as Lib
 import Tree.Random
 
@@ -12,21 +11,14 @@ testItem : String -> String -> Test
 testItem label str =
     test label <|
         \_ ->
-            Lib.test 1 renderNode (initialData 1) (String.trim str) |> Expect.equal "Ok"
+            Lib.test 1 "?" identity identity (String.trim str) |> Expect.equal "Ok"
 
 
 fuzzTest nodes label =
     fuzz2 (Fuzz.intRange 3 nodes) (Fuzz.intRange 0 10000) label <|
         \maxCount seed ->
-            Lib.test 1 renderNode (initialData 1) (Tree.Random.generateOutline maxCount seed)
+            Lib.test 1 [] renderNode makeNode (Tree.Random.generateOutline maxCount seed)
                 |> Expect.equal "Ok"
-
-
-initialData : Int -> InitialData (List Int)
-initialData quant =
-    { defaultNode = []
-    , makeNode = makeNode
-    }
 
 
 renderNode : List Int -> String

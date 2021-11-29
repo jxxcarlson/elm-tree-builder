@@ -4,7 +4,6 @@ import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer)
 import Test exposing (..)
 import Tree.Blocks as Blocks
-import Tree.Build exposing (InitialData)
 import Tree.Lib as Lib
 import Tree.Random
 
@@ -13,7 +12,7 @@ testItem : String -> String -> Test
 testItem label str =
     test label <|
         \_ ->
-            Lib.test 1 identity initialData str |> Expect.equal "Ok"
+            Lib.test 1 "?" identity identity str |> Expect.equal "Ok"
 
 
 fuzzTest nodes label =
@@ -30,14 +29,7 @@ fuzzTestAux maxCount seed =
         ( quantum, _ ) =
             outline |> Blocks.fromString |> Blocks.wellFormed
     in
-    Lib.test quantum identity initialData outline
-
-
-initialData : InitialData String
-initialData =
-    { defaultNode = "?"
-    , makeNode = identity
-    }
+    Lib.test quantum "?" identity identity outline
 
 
 suite : Test
