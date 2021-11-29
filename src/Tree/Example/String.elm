@@ -49,9 +49,8 @@ tree =
     Build.fromString initialData data
 
 
-
---testResult =
---    Render.test 1 identity initialData data
+testResult =
+    Render.test 1 identity initialData data
 
 
 data =
