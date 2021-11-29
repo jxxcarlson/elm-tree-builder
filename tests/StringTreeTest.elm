@@ -52,15 +52,13 @@ suite =
 
 fuzzSuite : Test
 fuzzSuite =
-    Test.only <|
-        describe "Fuzz test for building trees"
-            [ fuzzTest 5 "5 nodes"
-            , fuzzTest 10 "10 nodes"
-            , fuzzTest 20 "20 nodes"
-
-            --, fuzzTest 40 "40 nodes"
-            --, fuzzTest 80 "80 nodes"
-            ]
+    describe "Fuzz test for building trees"
+        [ fuzzTest 5 "5 nodes"
+        , fuzzTest 10 "10 nodes"
+        , fuzzTest 20 "20 nodes"
+        , fuzzTest 40 "40 nodes"
+        , fuzzTest 80 "80 nodes"
+        ]
 
 
 a =
