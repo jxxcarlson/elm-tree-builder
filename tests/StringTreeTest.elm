@@ -5,15 +5,15 @@ import Fuzz exposing (Fuzzer)
 import Test exposing (..)
 import Tree.Blocks as Blocks
 import Tree.Build exposing (InitialData)
+import Tree.Lib as Lib
 import Tree.Random
-import Tree.Render as Render
 
 
 testItem : String -> String -> Test
 testItem label str =
     test label <|
         \_ ->
-            Render.test 1 identity initialData str |> Expect.equal "Ok"
+            Lib.test 1 identity initialData str |> Expect.equal "Ok"
 
 
 fuzzTest nodes label =
@@ -30,7 +30,7 @@ fuzzTestAux maxCount seed =
         ( quantum, _ ) =
             outline |> Blocks.fromString |> Blocks.wellFormed
     in
-    Render.test quantum identity initialData outline
+    Lib.test quantum identity initialData outline
 
 
 initialData : InitialData String

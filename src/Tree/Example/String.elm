@@ -10,7 +10,7 @@ module Tree.Example.String exposing (..)
     > tree
       Tree "root" [Tree "1" [Tree "2" [Tree "3" [],Tree "4" [],Tree "5" []],Tree "6" []],Tree "7" [],Tree "8" [Tree "9" [],Tree "10" []]]
 
-    > import Tree.Render as R
+    > import Tree.Lib as R
     > R.render identity tree
       "1\n 2\n  3\n  4\n  5\n 6\n7\n8\n 9\n 10" : String
 
@@ -21,12 +21,12 @@ module Tree.Example.String exposing (..)
 
 import Tree.Blocks as Blocks
 import Tree.Build as Build exposing (InitialData)
+import Tree.Lib as Lib
 import Tree.Random
-import Tree.Render as Render
 
 
 r maxCount seed =
-    Render.test 1 identity initialData (Tree.Random.generateOutline maxCount seed)
+    Lib.test 1 identity initialData (Tree.Random.generateOutline maxCount seed)
 
 
 initialData : InitialData String
@@ -58,11 +58,11 @@ f maxCount seed =
         ( quantum, _ ) =
             outline |> Blocks.fromString |> Blocks.wellFormed
     in
-    Render.test quantum identity initialData outline
+    Lib.test quantum identity initialData outline
 
 
 testResult =
-    Render.test 1 identity initialData data
+    Lib.test 1 identity initialData data
 
 
 data =

@@ -4,21 +4,21 @@ import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer)
 import Test exposing (..)
 import Tree.Build exposing (InitialData)
+import Tree.Lib as Lib
 import Tree.Random
-import Tree.Render as Render
 
 
 testItem : String -> String -> Test
 testItem label str =
     test label <|
         \_ ->
-            Render.test 1 renderNode (initialData 1) (String.trim str) |> Expect.equal "Ok"
+            Lib.test 1 renderNode (initialData 1) (String.trim str) |> Expect.equal "Ok"
 
 
 fuzzTest nodes label =
     fuzz2 (Fuzz.intRange 3 nodes) (Fuzz.intRange 0 10000) label <|
         \maxCount seed ->
-            Render.test 1 renderNode (initialData 1) (Tree.Random.generateOutline maxCount seed)
+            Lib.test 1 renderNode (initialData 1) (Tree.Random.generateOutline maxCount seed)
                 |> Expect.equal "Ok"
 
 
