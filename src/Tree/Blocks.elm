@@ -1,4 +1,4 @@
-module Tree.Blocks exposing (Block, fromString, make, quantumOfBlocks, wellFormed)
+module Tree.Blocks exposing (Block, fromString, wellFormed)
 
 import Tree.Line as Line
 import Tree.Math as Math
