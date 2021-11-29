@@ -32,7 +32,6 @@ initialData : InitialData String
 initialData =
     { quant = 1
     , defaultNode = "?"
-    , rootNode = "0"
     , makeNode = identity
     }
 
@@ -56,10 +55,12 @@ testResult =
 
 
 data =
-    """1
+    """
+1
  2
- 3
-4"""
+  3
+  4
+"""
 
 
 data2 =

@@ -48,33 +48,73 @@ import Tree.Zipper as Zipper exposing (Zipper(..))
 
 -}
 type alias InitialData node =
-    { quant : Int
-    , defaultNode : node
-    , rootNode : node
+    { defaultNode : node
     , makeNode : String -> node
     }
 
 
-init : InitialData node -> List Block -> State node
+type Error
+    = EmptyBlocks
+    | BlocksNotWellFormed
+
+
+init : InitialData node -> List Block -> Result Error (State node)
 init initialData blocks =
-    { blocks = blocks
-    , zipper = Zipper.fromTree <| Tree.tree initialData.rootNode []
-    , indent = 0
-    , level = 0
-    , indentationQuantum = initialData.quant
-    , make = initialData.makeNode
-    , default = Zipper.fromTree (Tree.tree initialData.defaultNode [])
+    let
+        _ =
+            Debug.log "BLOCKS" blocks
+    in
+    case List.head blocks of
+        Nothing ->
+            Err EmptyBlocks
+
+        Just rootBlock ->
+            let
+                ( quantum, wellFormed ) =
+                    Block.wellFormed blocks
+
+                _ =
+                    Debug.log "rootBlock" rootBlock
+            in
+            if wellFormed == False then
+                Err BlocksNotWellFormed
+
+            else
+                Ok
+                    { blocks = List.drop 1 blocks
+                    , zipper = (Zipper.fromTree <| (Tree.tree (initialData.makeNode rootBlock.content) [] |> Debug.log "ROOT")) |> Debug.log "ZIPPER"
+                    , indentationQuantum = quantum
+                    , indent = 0
+                    , level = 0
+                    , make = initialData.makeNode
+                    , default = Zipper.fromTree (Tree.tree initialData.defaultNode [])
+                    }
+
+
+type alias State node =
+    { blocks : List Block
+    , zipper : Zipper node
+    , indentationQuantum : Int
+    , indent : Int
+    , level : Int
+    , make : String -> node
+    , default : Zipper node
     }
 
 
 {-| -}
-fromBlocks : InitialData node -> List Block -> Tree node
+fromBlocks : InitialData node -> List Block -> Result Error (Tree node)
 fromBlocks initialData blocks =
-    loop (init initialData blocks) nextStep
+    case init initialData blocks of
+        Err error ->
+            Err error
+
+        Ok initialState ->
+            Ok <| loop initialState nextStep
 
 
 {-| -}
-fromString : InitialData node -> String -> Tree node
+fromString : InitialData node -> String -> Result Error (Tree node)
 fromString initialData str =
     str
         |> Block.fromString
@@ -85,19 +125,12 @@ fromString initialData str =
 -- FUNCTIONAL LOOP
 
 
-type alias State node =
-    { blocks : List Block
-    , zipper : Zipper node
-    , indent : Int
-    , level : Int
-    , indentationQuantum : Int
-    , make : String -> node
-    , default : Zipper node
-    }
-
-
 nextStep : State node -> Step (State node) (Tree node)
 nextStep state =
+    let
+        _ =
+            Debug.log "STATE" state
+    in
     case List.head state.blocks of
         Nothing ->
             Done (Zipper.toTree state.zipper)

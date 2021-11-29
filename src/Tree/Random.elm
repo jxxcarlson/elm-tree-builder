@@ -8,7 +8,7 @@ import Tree.Extra
 
 
 {-| -}
-generate : Int -> Int -> Tree String
+generate : Int -> Int -> Maybe (Tree String)
 generate maxCount seed =
     generateOutline maxCount seed
         |> Build.fromString initialData
@@ -22,7 +22,6 @@ generateOutline maxCount seed =
 initialData =
     { quant = 1
     , defaultNode = "?"
-    , rootNode = "root"
     , makeNode = identity
     }
 
@@ -108,7 +107,7 @@ nextStep state =
 
 
 depths nodes steps =
-    List.foldl (\n acc -> (generate nodes n |> Tree.Extra.depth) :: acc) [] (List.range 0 steps)
+    List.foldl (\n acc -> (generate nodes n |> Maybe.map Tree.Extra.depth |> Maybe.withDefault 0) :: acc) [] (List.range 0 steps)
         |> List.sort
         |> List.Extra.group
         |> List.map (\( a, b ) -> ( a, List.length b + 1 ))

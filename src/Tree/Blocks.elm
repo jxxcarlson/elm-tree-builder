@@ -1,6 +1,7 @@
-module Tree.Blocks exposing (Block, fromString, make)
+module Tree.Blocks exposing (Block, fromString, make, quantumOfBlocks, wellFormed)
 
 import Tree.Line as Line
+import Tree.Math as Math
 
 
 type alias Block =
@@ -9,9 +10,71 @@ type alias Block =
     }
 
 
+differences : List Int -> List Int
+differences xs =
+    let
+        n =
+            List.length xs
+
+        us =
+            List.drop 1 xs
+
+        vs =
+            List.take (n - 1) xs
+    in
+    List.map2 (-) us vs
+
+
+{-|
+
+    > "1\n 2\n  3\n    4" |> fromString |> quantumOfBlocks
+      1
+
+    > "1\n  2\n    3\n      4" |> fromString |> quantumOfBlocks
+       2
+
+    > "1\n  2\n   3" |> fromString |> quantumOfBlocks
+
+-}
+quantumOfBlocks : List Block -> Int
+quantumOfBlocks blocks =
+    blocks |> List.map .indent |> differences |> List.filter (\n -> n > 0) |> Math.gcdList
+
+
+{-|
+
+    > "1\n 2\n 3\n  4\n 5" |> fromString |> wellFormed
+      QUANTUM: 1
+      Deltas: [1,0,1,-1]
+      (1, True)
+
+    > "1\n  2\n    3\n     4\n 5" |> fromString |> wellFormed
+       QUANTUM: 1
+       Deltas: [2,2,1,-4]
+       (1, False)
+
+    > "1\n  2\n  3\n    4\n5" |> fromString |> wellFormed
+      QUANTUM: 2
+      Deltas: [1,0,1,-2]
+      (2, True)
+
+-}
+wellFormed : List Block -> ( Int, Bool )
+wellFormed blocks =
+    let
+        quantum =
+            quantumOfBlocks blocks
+
+        outliers =
+            blocks |> List.map .indent |> differences |> List.map (\k -> k // quantum) |> List.filter (\n -> n > 1)
+    in
+    ( quantum, List.length outliers == 0 )
+
+
 fromString : String -> List Block
 fromString str =
     str
+        |> String.trim
         |> String.lines
         |> List.map (\line -> Line.classify line)
 
