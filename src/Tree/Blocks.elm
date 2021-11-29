@@ -1,4 +1,4 @@
-module Tree.Blocks exposing (Block, fromString, wellFormed)
+module Tree.Blocks exposing (Block, fromString, quantumOfBlocks, wellFormed)
 
 import Tree.Line as Line
 import Tree.Math as Math
@@ -38,7 +38,7 @@ differences xs =
 -}
 quantumOfBlocks : List Block -> Int
 quantumOfBlocks blocks =
-    blocks |> List.map .indent |> differences |> List.filter (\n -> n > 0) |> Math.gcdList
+    blocks |> Debug.log "Q, Blocks" |> List.map .indent |> differences |> List.filter (\n -> n > 0) |> Math.gcdList
 
 
 {-|
@@ -63,10 +63,15 @@ wellFormed : List Block -> ( Int, Bool )
 wellFormed blocks =
     let
         quantum =
-            quantumOfBlocks blocks
+            quantumOfBlocks blocks |> Debug.log "QUANTUM"
 
         outliers =
-            blocks |> List.map .indent |> differences |> List.map (\k -> k // quantum) |> List.filter (\n -> n > 1)
+            blocks
+                |> List.map .indent
+                |> differences
+                |> List.map (\k -> k // quantum)
+                |> List.filter (\n -> n > 1)
+                |> Debug.log "OUTLIERS"
     in
     ( quantum, List.length outliers == 0 )
 

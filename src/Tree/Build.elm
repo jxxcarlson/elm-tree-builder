@@ -1,7 +1,4 @@
-module Tree.Build exposing
-    ( fromString, fromBlocks
-    , Error
-    )
+module Tree.Build exposing (fromString, fromBlocks, forestFromString, forestFromBlocks, Error(..))
 
 {-|
 
@@ -10,38 +7,24 @@ module Tree.Build exposing
 
     Example:
 
-        > initialData =
-            { quant = 1
-            , defaultNode = "?"
-            , rootNode = "0"
-            , makeNode = identity
-            }
-
         > data = "1\n 2\n 3\n 4\n5\n 6\n 7"
 
-        > fromString initialData data
+        > fromString "?" identity data
           Tree "0" [
                 Tree "1" [Tree "2" [],Tree "3" [], Tree "4" []]
               , Tree "5" [Tree "6" [],Tree "7" []]
               ]
 
-@docs fromString, fromBlocks, InitialData
+@docs fromString, fromBlocks, forestFromString, forestFromBlocks, Error
 
 -}
 
 import Tree exposing (Tree(..))
-import Tree.Blocks as Block exposing (Block)
+import Tree.Blocks as Blocks exposing (Block)
 import Tree.Zipper as Zipper exposing (Zipper(..))
 
 
 {-| Example for trees whose nodes labeled by lists of Ints:
-
-    initialData =
-        { quant = 2
-        , defaultNode = []
-        , rootNode = [ 0 ]
-        , makeNode = identity
-        }
 
     makeNode : String -> List Int
     makeNode content =
@@ -56,6 +39,7 @@ type alias InitialData node =
     }
 
 
+{-| -}
 type Error
     = EmptyBlocks
     | BlocksNotWellFormed
@@ -70,7 +54,7 @@ init defaultNode makeNode blocks =
         Just rootBlock ->
             let
                 ( quantum, wellFormed ) =
-                    Block.wellFormed blocks
+                    Blocks.wellFormed blocks
             in
             if wellFormed == False then
                 Err BlocksNotWellFormed
@@ -113,8 +97,43 @@ fromBlocks defaultNode makeNode blocks =
 fromString : node -> (String -> node) -> String -> Result Error (Tree node)
 fromString defaultNode makeNode str =
     str
-        |> Block.fromString
+        |> Blocks.fromString
         |> fromBlocks defaultNode makeNode
+
+
+{-| Example:
+
+    > forestFromString "?" identity identity "1\n 2\n 3"
+      Ok [Tree "1" [Tree "2" [],Tree "3" []]]
+
+    > forestFromString "?" identity identity "1\n 2\n 3\n4\n 5\n 6"
+    Ok [Tree "1" [Tree "2" [],Tree "3" []],Tree "4" [Tree "5" [],Tree "6" []]]
+
+-}
+forestFromString : a -> (String -> a) -> (a -> String) -> String -> Result Error (List (Tree a))
+forestFromString defaultNode makeNode renderNode str =
+    str
+        |> Blocks.fromString
+        |> Debug.log "BLOCKS"
+        |> forestFromBlocks defaultNode makeNode renderNode
+
+
+{-| -}
+forestFromBlocks : a -> (String -> a) -> (a -> String) -> List Block -> Result Error (List (Tree a))
+forestFromBlocks defaultNode makeNode renderNode blocks =
+    let
+        quantum =
+            Blocks.quantumOfBlocks blocks
+
+        blocks1 : List Block
+        blocks1 =
+            blocks |> List.map (\b -> { b | indent = b.indent + quantum })
+
+        blocks2 : List Block
+        blocks2 =
+            { content = renderNode defaultNode, indent = 0 } :: blocks1 |> Debug.log "BLOCKS2"
+    in
+    fromBlocks defaultNode makeNode blocks2 |> Result.map Tree.children
 
 
 

@@ -1,4 +1,4 @@
-module Tree.Lib exposing (preorder, test, toString)
+module Tree.Lib exposing (forestTest, forestToString, preorder, test, toString)
 
 import Tree exposing (Tree)
 import Tree.Build
@@ -55,6 +55,29 @@ nextStep state =
 toString : Int -> (a -> String) -> Tree a -> String
 toString quantum renderNode tree =
     renderAux quantum renderNode ( tree, 0 ) |> String.dropRight 1
+
+
+forestToString : Int -> (a -> String) -> List (Tree a) -> String
+forestToString quantum renderNode forest =
+    List.map (toString quantum renderNode) forest |> String.join "\n"
+
+
+forestTest : Int -> node -> (node -> String) -> (String -> node) -> String -> String
+forestTest quantum defaultNode renderNode makeNode str =
+    let
+        maybeStr2 =
+            Tree.Build.forestFromString defaultNode makeNode renderNode str |> Debug.log "FOREST" |> Result.toMaybe |> Maybe.map (forestToString quantum renderNode)
+    in
+    if Just (String.trim str) == maybeStr2 then
+        "Ok"
+
+    else
+        case maybeStr2 of
+            Nothing ->
+                "Failed to build forest or render it to string"
+
+            Just str2 ->
+                String.trim str ++ " ≠ " ++ str2
 
 
 test : Int -> node -> (node -> String) -> (String -> node) -> String -> String
