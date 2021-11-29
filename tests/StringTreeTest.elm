@@ -1,9 +1,10 @@
 module StringTreeTest exposing (..)
 
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
+import Fuzz exposing (Fuzzer)
 import Test exposing (..)
-import Tree.Build as Build exposing (InitialData)
+import Tree.Build exposing (InitialData)
+import Tree.Random
 import Tree.Render as Render
 
 
@@ -12,6 +13,13 @@ testItem label str =
     test label <|
         \_ ->
             Render.test 1 identity initialData str |> Expect.equal "Ok"
+
+
+fuzzTest nodes label =
+    fuzz2 (Fuzz.intRange 3 nodes) (Fuzz.intRange 0 10000) label <|
+        \maxCount seed ->
+            Render.test 1 identity initialData (Tree.Random.generateOutline maxCount seed)
+                |> Expect.equal "Ok"
 
 
 initialData : InitialData String
@@ -30,6 +38,18 @@ suite =
         , testItem "B" b
         , testItem "C" c
         , testItem "D" d
+        ]
+
+
+fuzzSuite : Test
+fuzzSuite =
+    describe "Fuzz test for building trees"
+        [ fuzzTest 5 "5 nodes"
+        , fuzzTest 10 "10 nodes"
+        , fuzzTest 20 "20 nodes"
+
+        --, fuzzTest 40 "40 nodes"
+        --, fuzzTest 80 "80 nodes"
         ]
 
 

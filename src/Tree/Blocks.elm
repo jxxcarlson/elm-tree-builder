@@ -12,7 +12,6 @@ type alias Block =
 fromString : String -> List Block
 fromString str =
     str
-        |> String.trim
         |> String.lines
         |> List.map (\line -> Line.classify line)
 

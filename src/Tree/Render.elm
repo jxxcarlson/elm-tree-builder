@@ -1,7 +1,6 @@
-module Tree.Render exposing (render, test)
+module Tree.Render exposing (test, toString)
 
 import Tree exposing (Tree)
-import Tree.Blocks as Block
 import Tree.Build exposing (InitialData)
 
 
@@ -14,18 +13,21 @@ type alias TestData node =
     }
 
 
-render : Int -> (a -> String) -> Tree a -> String
-render quantum renderNode tree =
-    renderAux quantum renderNode ( tree, -1 ) |> String.replace "root\n" "" |> String.dropRight 1
+toString : Int -> (a -> String) -> Tree a -> String
+toString quantum renderNode tree =
+    renderAux quantum renderNode ( tree, -1 ) |> String.dropRight 1
 
 
 test : Int -> (node -> String) -> InitialData node -> String -> String
 test quantum renderNode initialData str =
     let
         str2 =
-            Tree.Build.fromString initialData str |> render quantum renderNode
+            Tree.Build.fromString initialData str |> toString quantum renderNode
+
+        rootString =
+            renderNode initialData.rootNode ++ "\n"
     in
-    if String.trim str == String.trim str2 then
+    if rootString ++ str == str2 then
         "Ok"
 
     else

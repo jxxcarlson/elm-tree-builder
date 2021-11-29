@@ -20,16 +20,25 @@ module Tree.Example.String exposing (..)
 -}
 
 import Tree.Build as Build exposing (InitialData)
+import Tree.Random
 import Tree.Render as Render
+
+
+r maxCount seed =
+    Render.test 1 identity initialData (Tree.Random.generateOutline maxCount seed)
 
 
 initialData : InitialData String
 initialData =
     { quant = 1
     , defaultNode = "?"
-    , rootNode = "root"
+    , rootNode = "0"
     , makeNode = identity
     }
+
+
+b stuff =
+    Build.fromString initialData stuff
 
 
 {-|
@@ -47,6 +56,13 @@ testResult =
 
 
 data =
+    """1
+ 2
+ 3
+4"""
+
+
+data2 =
     """1
  2
   3

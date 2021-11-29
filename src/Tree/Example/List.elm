@@ -38,20 +38,38 @@ renderNode ks =
 initialData quant =
     { quant = quant
     , defaultNode = []
-    , rootNode = []
+    , rootNode = [ 0 ]
     , makeNode = makeNode
     }
 
 
 tree =
-    Build.fromString (initialData 2) data
+    Build.fromString (initialData 1) data2
+
+
+test k str =
+    Render.test k renderNode (initialData k) str
 
 
 testResult =
-    Render.test 2 renderNode (initialData 2) data
+    test 1 data2
 
 
 data =
+    """1,1
+  2,2
+  3,3
+4,4"""
+
+
+data2 =
+    """1,1
+ 2,2
+ 3,3
+4,4"""
+
+
+data3 =
     """1
   2,3
   4,5
