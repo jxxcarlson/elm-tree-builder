@@ -1,4 +1,7 @@
-module Tree.Build exposing (fromString, fromBlocks, InitialData)
+module Tree.Build exposing
+    ( fromString, fromBlocks, InitialData
+    , Error
+    )
 
 {-|
 

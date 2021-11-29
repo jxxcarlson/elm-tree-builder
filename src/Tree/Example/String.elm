@@ -30,8 +30,7 @@ r maxCount seed =
 
 initialData : InitialData String
 initialData =
-    { quant = 1
-    , defaultNode = "?"
+    { defaultNode = "?"
     , makeNode = identity
     }
 
@@ -50,8 +49,9 @@ tree =
     Build.fromString initialData data
 
 
-testResult =
-    Render.test 1 identity initialData data
+
+--testResult =
+--    Render.test 1 identity initialData data
 
 
 data =

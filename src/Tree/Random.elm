@@ -3,12 +3,12 @@ module Tree.Random exposing (depths, generate, generateOutline)
 import List.Extra
 import Random
 import Tree exposing (Tree)
-import Tree.Build as Build exposing (InitialData)
+import Tree.Build as Build exposing (Error, InitialData)
 import Tree.Extra
 
 
 {-| -}
-generate : Int -> Int -> Maybe (Tree String)
+generate : Int -> Int -> Result Error (Tree String)
 generate maxCount seed =
     generateOutline maxCount seed
         |> Build.fromString initialData
@@ -20,8 +20,7 @@ generateOutline maxCount seed =
 
 
 initialData =
-    { quant = 1
-    , defaultNode = "?"
+    { defaultNode = "?"
     , makeNode = identity
     }
 
@@ -107,7 +106,7 @@ nextStep state =
 
 
 depths nodes steps =
-    List.foldl (\n acc -> (generate nodes n |> Maybe.map Tree.Extra.depth |> Maybe.withDefault 0) :: acc) [] (List.range 0 steps)
+    List.foldl (\n acc -> (generate nodes n |> Result.toMaybe |> Maybe.map Tree.Extra.depth |> Maybe.withDefault 0) :: acc) [] (List.range 0 steps)
         |> List.sort
         |> List.Extra.group
         |> List.map (\( a, b ) -> ( a, List.length b + 1 ))
