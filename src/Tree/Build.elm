@@ -1,5 +1,5 @@
 module Tree.Build exposing
-    ( fromString, fromBlocks, InitialData
+    ( fromString, fromBlocks
     , Error
     )
 

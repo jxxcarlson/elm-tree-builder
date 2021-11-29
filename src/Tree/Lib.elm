@@ -1,7 +1,7 @@
 module Tree.Lib exposing (preorder, test, toString)
 
 import Tree exposing (Tree)
-import Tree.Build exposing (InitialData)
+import Tree.Build
 import Tree.Zipper as Zipper exposing (Zipper)
 
 
@@ -57,11 +57,11 @@ toString quantum renderNode tree =
     renderAux quantum renderNode ( tree, 0 ) |> String.dropRight 1
 
 
-test : Int -> (node -> String) -> InitialData node -> String -> String
-test quantum renderNode initialData str =
+test : Int -> node -> (node -> String) -> (String -> node) -> String -> String
+test quantum defaultNode renderNode makeNode str =
     let
         maybeStr2 =
-            Tree.Build.fromString initialData str |> Result.toMaybe |> Maybe.map (toString quantum renderNode)
+            Tree.Build.fromString defaultNode makeNode str |> Result.toMaybe |> Maybe.map (toString quantum renderNode)
     in
     if Just (String.trim str) == maybeStr2 then
         "Ok"
