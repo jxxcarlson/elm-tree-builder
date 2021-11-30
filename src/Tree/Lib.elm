@@ -1,33 +1,33 @@
-module Tree.Lib exposing (edges, levelOrder, preorder, preorderF, repeatF)
+module Tree.Lib exposing (preOrder, levelOrder, edges)
+
+{-| Utility functions. preOrder and levelOrder transform
+Tree a to List a, where the nodes are listed in the
+given order. Given Tree a, the edges function returns
+List (a,a), where a pair (p,q) is in the returned list
+if and only if q is a child of p.
+
+@docs preOrder, levelOrder, edges
+
+-}
 
 import Tree exposing (Tree(..))
 import Tree.Zipper as Zipper exposing (Zipper)
 
 
-type alias State a =
-    { zipper : Maybe (Zipper a)
-    , nodes : List a
-    }
-
-
-type alias StateF a b =
-    { zipper : Maybe (Zipper a)
-    , nodes : List b
-    }
-
-
-preorder : Tree a -> List a
-preorder tree =
+{-| -}
+preOrder : Tree a -> List a
+preOrder tree =
     loop (init tree) nextStep
         |> List.reverse
 
 
-{-|
+{-| -}
+levelOrder : Tree a -> List a
+levelOrder tree =
+    lox [ tree ]
 
-    Given a tree, return a list of pairs of node labels
-    representing edges of the tree.
 
--}
+{-| -}
 edges : Tree a -> List ( a, a )
 edges tree =
     let
@@ -48,28 +48,13 @@ edges tree =
     List.map2 (\a b -> ( a, b )) l1 (List.drop 1 l2)
 
 
-repeatF : List ( a, Int ) -> List a
-repeatF list =
-    List.foldl (\( a, n ) acc -> List.repeat n a ++ acc) [] list |> List.reverse
+
+--FOR PREORDER
 
 
-preorderF : (a -> Tree a -> b) -> Tree a -> List b
-preorderF f tree =
-    loop (initF f tree) (nextStepF f)
-        |> List.reverse
-
-
-initF : (a -> Tree a -> b) -> Tree a -> StateF a b
-initF f tree =
-    let
-        initialZipper =
-            Zipper.fromTree tree
-
-        firstNode =
-            Zipper.label initialZipper
-    in
-    { zipper = Just initialZipper
-    , nodes = [ f firstNode tree ]
+type alias State a =
+    { zipper : Maybe (Zipper a)
+    , nodes : List a
     }
 
 
@@ -106,6 +91,41 @@ nextStep state =
                     Loop { zipper = Just newZipper, nodes = Zipper.label newZipper :: state.nodes }
 
 
+
+-- FOR EDGES
+
+
+type alias StateF a b =
+    { zipper : Maybe (Zipper a)
+    , nodes : List b
+    }
+
+
+repeatF : List ( a, Int ) -> List a
+repeatF list =
+    List.foldl (\( a, n ) acc -> List.repeat n a ++ acc) [] list |> List.reverse
+
+
+preorderF : (a -> Tree a -> b) -> Tree a -> List b
+preorderF f tree =
+    loop (initF f tree) (nextStepF f)
+        |> List.reverse
+
+
+initF : (a -> Tree a -> b) -> Tree a -> StateF a b
+initF f tree =
+    let
+        initialZipper =
+            Zipper.fromTree tree
+
+        firstNode =
+            Zipper.label initialZipper
+    in
+    { zipper = Just initialZipper
+    , nodes = [ f firstNode tree ]
+    }
+
+
 nextStepF : (a -> Tree a -> b) -> StateF a b -> Step (StateF a b) (List b)
 nextStepF f state =
     case state.zipper of
@@ -132,9 +152,8 @@ nextStepF f state =
                     Loop { zipper = Just newZipper, nodes = newNode :: state.nodes }
 
 
-levelOrder : Tree a -> List a
-levelOrder tree =
-    lox [ tree ]
+
+-- FOR LEVEL ORDER
 
 
 lox : List (Tree a) -> List a
