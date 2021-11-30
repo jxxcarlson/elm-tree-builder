@@ -1,12 +1,8 @@
 module ForestTests exposing (..)
 
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer)
 import Test exposing (..)
-import Tree.Blocks as Blocks
 import Tree.Build as Build
-import Tree.Lib as Lib
-import Tree.Random
 import Tree.Test as T
 
 
