@@ -50,7 +50,7 @@ f maxCount seed =
             Tree.Random.generateOutline maxCount seed
 
         ( quantum, _ ) =
-            outline |> Blocks.fromString |> Blocks.wellFormed
+            outline |> Blocks.fromStringAsLines |> Blocks.wellFormed
     in
     Lib.test 1 "?" identity identity outline
 

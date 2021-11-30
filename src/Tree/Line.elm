@@ -33,6 +33,6 @@ prefixParser =
         |= Parser.getOffset
         |. Parser.chompWhile (\c -> c == ' ')
         |= Parser.getOffset
-        |. Parser.chompWhile (\c -> c /= ' ')
+        |. Parser.chompWhile (\c -> c /= '\n')
         |= Parser.getOffset
         |= Parser.getSource

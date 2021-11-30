@@ -5,19 +5,20 @@ import Fuzz exposing (Fuzzer)
 import Test exposing (..)
 import Tree.Lib as Lib
 import Tree.Random
+import Tree.Test as T
 
 
 testItem : String -> String -> Test
 testItem label str =
     test label <|
         \_ ->
-            Lib.test 1 "?" identity identity (String.trim str) |> Expect.equal "Ok"
+            T.test 1 "?" identity identity (String.trim str) |> Expect.equal "Ok"
 
 
 fuzzTest nodes label =
     fuzz2 (Fuzz.intRange 3 nodes) (Fuzz.intRange 0 10000) label <|
         \maxCount seed ->
-            Lib.test 1 [] renderNode makeNode (Tree.Random.generateOutline maxCount seed)
+            T.test 1 [] renderNode makeNode (Tree.Random.generateOutline maxCount seed)
                 |> Expect.equal "Ok"
 
 

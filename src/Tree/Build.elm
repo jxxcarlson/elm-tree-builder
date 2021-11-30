@@ -1,9 +1,7 @@
 module Tree.Build exposing (fromString, fromBlocks, forestFromString, forestFromBlocks, Error(..))
 
-{-|
-
-    This module provides tools for building
-    a tree from a string or a list of blocks.
+{-| Tools for building
+a tree from a string or a list of blocks.
 
     Example:
 
@@ -15,6 +13,10 @@ module Tree.Build exposing (fromString, fromBlocks, forestFromString, forestFrom
               , Tree "5" [Tree "6" [],Tree "7" []]
               ]
 
+The first argument of fromString is a label for a default node.
+The second argument, of type (String -> node), tells how to build a node from a string
+representation of that node.
+
 @docs fromString, fromBlocks, forestFromString, forestFromBlocks, Error
 
 -}
@@ -24,19 +26,17 @@ import Tree.Blocks as Blocks exposing (Block)
 import Tree.Zipper as Zipper exposing (Zipper(..))
 
 
-{-| Example for trees whose nodes labeled by lists of Ints:
 
-    makeNode : String -> List Int
-    makeNode content =
-        content
-            |> String.split ","
-            |> List.map (\s -> String.toInt s |> Maybe.withDefault 0)
-
--}
-type alias InitialData node =
-    { defaultNode : node
-    , makeNode : String -> node
-    }
+--
+--{-| Example for trees whose nodes labeled by lists of Ints:
+--
+--    makeNode : String -> List Int
+--    makeNode content =
+--        content
+--            |> String.split ","
+--            |> List.map (\s -> String.toInt s |> Maybe.withDefault 0)
+--
+---}
 
 
 {-| -}
@@ -97,7 +97,7 @@ fromBlocks defaultNode makeNode blocks =
 fromString : node -> (String -> node) -> String -> Result Error (Tree node)
 fromString defaultNode makeNode str =
     str
-        |> Blocks.fromString
+        |> Blocks.fromStringAsLines
         |> fromBlocks defaultNode makeNode
 
 
@@ -113,7 +113,7 @@ fromString defaultNode makeNode str =
 forestFromString : a -> (String -> a) -> (a -> String) -> String -> Result Error (List (Tree a))
 forestFromString defaultNode makeNode renderNode str =
     str
-        |> Blocks.fromString
+        |> Blocks.fromStringAsLines
         |> Debug.log "BLOCKS"
         |> forestFromBlocks defaultNode makeNode renderNode
 

@@ -1,9 +1,35 @@
-module Tree.Blocks exposing (Block, fromString, quantumOfBlocks, wellFormed)
+module Tree.Blocks exposing (Block, fromStringAsLines, fromStringAsParagraphs, make, quantumOfBlocks, wellFormed)
+
+{-| This module provides tools for converting text into a list of blocks, where
+
+        type alias Block =
+            { indent : Int
+            , content : String
+            }
+
+Lists of blocks are used by the functions in Tree.Build to construct trees
+form text. Here are some examples:
+
+        > fromStringAsLines "one\n  two\n    three"
+          [   { content = "one", indent = 0 }
+            , { content = "two", indent = 2 }
+            , { content = "three", indent = 4 }
+          ]
+
+        > fromStringAsParagraphs "one\nho ho ho!\n  two\n  ha ha ha!"
+          [   { content = "one\nho ho ho!", indent = 0 }
+            , { content = "two\nha ha ha!", indent = 2 }
+          ]
+
+@docs Block, fromStringAsLines, fromStringAsParagraphs, make, quantumOfBlocks, wellFormed
+
+-}
 
 import Tree.Line as Line
 import Tree.Math as Math
 
 
+{-| -}
 type alias Block =
     { indent : Int
     , content : String
@@ -25,7 +51,10 @@ differences xs =
     List.map2 (-) us vs
 
 
-{-|
+{-| Determine the "quantum of indentation." In a well-formed
+list of blocks, when the indentation level increases, it increases
+by one quantum. When it decreases, it decreases by one or
+more quanta.
 
     > "1\n 2\n  3\n    4" |> fromString |> quantumOfBlocks
       1
@@ -41,21 +70,19 @@ quantumOfBlocks blocks =
     blocks |> Debug.log "Q, Blocks" |> List.map .indent |> differences |> List.filter (\n -> n > 0) |> Math.gcdList
 
 
-{-|
+{-| Determine if a list of blocks is well-formed, meaning that when
+the indentation level increases, it increases by one quantum
+and no more. The return value is a pair consisting of the
+quantum of indentation and True or False, depending on
+whethe the list is well-formed.
 
     > "1\n 2\n 3\n  4\n 5" |> fromString |> wellFormed
-      QUANTUM: 1
-      Deltas: [1,0,1,-1]
       (1, True)
 
     > "1\n  2\n    3\n     4\n 5" |> fromString |> wellFormed
-       QUANTUM: 1
-       Deltas: [2,2,1,-4]
        (1, False)
 
     > "1\n  2\n  3\n    4\n5" |> fromString |> wellFormed
-      QUANTUM: 2
-      Deltas: [1,0,1,-2]
       (2, True)
 
 -}
@@ -76,14 +103,22 @@ wellFormed blocks =
     ( quantum, List.length outliers == 0 )
 
 
-fromString : String -> List Block
-fromString str =
+{-| -}
+fromStringAsLines : String -> List Block
+fromStringAsLines str =
     str
         |> String.trim
         |> String.lines
         |> List.map (\line -> Line.classify line)
 
 
+{-| -}
+fromStringAsParagraphs : String -> List Block
+fromStringAsParagraphs str =
+    str |> String.lines |> make
+
+
+{-| -}
 make : List String -> List Block
 make lines =
     loop (init lines) nextStep
@@ -199,3 +234,31 @@ loop s f =
 
         Done b ->
             b
+
+
+example =
+    """
+This is a test.
+And so is this.
+
+Roses are red.
+Violets are blue.
+
+Matter is made of atoms.
+They are very small.
+
+"""
+
+
+example2 =
+    """
+This is a test.
+And so is this.
+
+  Roses are red.
+  Violets are blue.
+
+    Matter is made of atoms.
+    They are very small.
+
+"""

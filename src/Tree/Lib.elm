@@ -1,4 +1,4 @@
-module Tree.Lib exposing (edges, forestTest, forestToString, levelOrder, levelOrder2, preorder, preorderF, repeatF, test, toString)
+module Tree.Lib exposing (edges, forestToString, levelOrder, preorder, preorderF, repeatF, toString)
 
 import Tree exposing (Tree(..))
 import Tree.Build
@@ -143,42 +143,6 @@ forestToString quantum renderNode forest =
     List.map (toString quantum renderNode) forest |> String.join "\n"
 
 
-forestTest : Int -> node -> (node -> String) -> (String -> node) -> String -> String
-forestTest quantum defaultNode renderNode makeNode str =
-    let
-        maybeStr2 =
-            Tree.Build.forestFromString defaultNode makeNode renderNode str |> Debug.log "FOREST" |> Result.toMaybe |> Maybe.map (forestToString quantum renderNode)
-    in
-    if Just (String.trim str) == maybeStr2 then
-        "Ok"
-
-    else
-        case maybeStr2 of
-            Nothing ->
-                "Failed to build forest or render it to string"
-
-            Just str2 ->
-                String.trim str ++ " ≠ " ++ str2
-
-
-test : Int -> node -> (node -> String) -> (String -> node) -> String -> String
-test quantum defaultNode renderNode makeNode str =
-    let
-        maybeStr2 =
-            Tree.Build.fromString defaultNode makeNode str |> Result.toMaybe |> Maybe.map (toString quantum renderNode)
-    in
-    if Just (String.trim str) == maybeStr2 then
-        "Ok"
-
-    else
-        case maybeStr2 of
-            Nothing ->
-                "Failed to build tree or render it to string"
-
-            Just str2 ->
-                String.trim str ++ " ≠ " ++ str2
-
-
 renderAux : Int -> (node -> String) -> ( Tree node, Int ) -> String
 renderAux quantum renderNode ( tree, level ) =
     let
@@ -201,22 +165,6 @@ levelOrder tree =
     lox [ tree ]
 
 
-levelOrder2 : Tree a -> List ( a, a )
-levelOrder2 tree =
-    lox2 identity [ diagonal tree ]
-
-
-diagonal : Tree a -> Tree ( a, a )
-diagonal tree =
-    Tree.map (\a -> ( a, a )) tree
-
-
-
---childCount : Tree a -> Tree (a, Int)
---childCount tree =
---    Tree.map (\a -> (a, List.length (Tree.children)
-
-
 lox : List (Tree a) -> List a
 lox list =
     case list of
@@ -227,29 +175,7 @@ lox list =
             Tree.label first :: lox (rest ++ Tree.children first)
 
 
-lox2 : (( a, a ) -> ( a, a )) -> List (Tree ( a, a )) -> List ( a, a )
-lox2 f list =
-    case list of
-        [] ->
-            []
 
-        first :: rest ->
-            let
-                ff =
-                    \( _, y ) -> f ( Tree.label first |> Tuple.first, y )
-            in
-            Tree.label first :: lox2 f rest ++ lox2 ff (Tree.children first)
-
-
-
---
---first :: rest ->
---     if Tree.children first == [] then
---        first :: lox2 (\( x, y ) -> f ( Tree.label first |> Tuple.first, y )) rest
---
---    else
---        [ Tree.tree (Tree.label first) [] ] ++ lox2 (\( x, y ) -> f ( Tree.label first |> Tuple.first, y )) (Tree.children first) ++ lox2 (\( x, y ) -> f ( Tree.label first |> Tuple.first, y )) rest
---
 -- LOOP
 
 

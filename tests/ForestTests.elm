@@ -7,13 +7,14 @@ import Tree.Blocks as Blocks
 import Tree.Build as Build
 import Tree.Lib as Lib
 import Tree.Random
+import Tree.Test as T
 
 
 testItem : Int -> String -> String -> Test
 testItem quantum label str =
     test label <|
         \_ ->
-            Lib.forestTest quantum "?" identity identity str |> Expect.equal "Ok"
+            T.forestTest quantum "?" identity identity str |> Expect.equal "Ok"
 
 
 testForestNumber : Int -> String -> String -> Test
