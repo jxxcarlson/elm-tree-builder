@@ -1,6 +1,6 @@
-module Tree.Lib exposing (forestTest, forestToString, preorder, test, toString)
+module Tree.Lib exposing (edges, forestTest, forestToString, levelOrder, levelOrder2, preorder, preorderF, repeatF, test, toString)
 
-import Tree exposing (Tree)
+import Tree exposing (Tree(..))
 import Tree.Build
 import Tree.Zipper as Zipper exposing (Zipper)
 
@@ -11,20 +11,75 @@ type alias State a =
     }
 
 
+type alias StateF a b =
+    { zipper : Maybe (Zipper a)
+    , nodes : List b
+    }
+
+
 preorder : Tree a -> List a
 preorder tree =
     loop (init tree) nextStep
         |> List.reverse
 
 
-init : Tree a -> State a
-init tree =
+{-|
+
+    Given a tree, return a list of pairs of node labels
+    representing edges of the tree.
+
+-}
+edges : Tree a -> List ( a, a )
+edges tree =
     let
-        initialZipper : Zipper a
+        f a t_ =
+            ( a, List.length (Tree.children t_) )
+
+        t1 : List ( a, Int )
+        t1 =
+            (\tt -> preorderF f tt) tree |> Debug.log "T1"
+
+        l1 : List a
+        l1 =
+            repeatF t1 |> Debug.log "L1"
+
+        l2 =
+            levelOrder tree |> Debug.log "L2"
+    in
+    List.map2 (\a b -> ( a, b )) l1 (List.drop 1 l2)
+
+
+repeatF : List ( a, Int ) -> List a
+repeatF list =
+    List.foldl (\( a, n ) acc -> List.repeat n a ++ acc) [] list |> List.reverse
+
+
+preorderF : (a -> Tree a -> b) -> Tree a -> List b
+preorderF f tree =
+    loop (initF f tree) (nextStepF f)
+        |> List.reverse
+
+
+initF : (a -> Tree a -> b) -> Tree a -> StateF a b
+initF f tree =
+    let
         initialZipper =
             Zipper.fromTree tree
 
-        firstNode : a
+        firstNode =
+            Zipper.label initialZipper
+    in
+    { zipper = Just initialZipper
+    , nodes = [ f firstNode tree ]
+    }
+
+
+init : Tree a -> State a
+init tree =
+    let
+        initialZipper =
+            Zipper.fromTree tree
+
         firstNode =
             Zipper.label initialZipper
     in
@@ -50,6 +105,32 @@ nextStep state =
 
                 Just newZipper ->
                     Loop { zipper = Just newZipper, nodes = Zipper.label newZipper :: state.nodes }
+
+
+nextStepF : (a -> Tree a -> b) -> StateF a b -> Step (StateF a b) (List b)
+nextStepF f state =
+    case state.zipper of
+        Nothing ->
+            Done state.nodes
+
+        Just z ->
+            let
+                maybeNewZipper =
+                    Zipper.forward z
+            in
+            case maybeNewZipper of
+                Nothing ->
+                    Done state.nodes
+
+                Just newZipper ->
+                    let
+                        currentTree =
+                            Zipper.tree newZipper
+
+                        newNode =
+                            f (Zipper.label newZipper) currentTree
+                    in
+                    Loop { zipper = Just newZipper, nodes = newNode :: state.nodes }
 
 
 toString : Int -> (a -> String) -> Tree a -> String
@@ -113,6 +194,63 @@ renderAux quantum renderNode ( tree, level ) =
 prefix : Int -> Int -> String
 prefix quantum level =
     String.repeat (quantum * level) " "
+
+
+levelOrder : Tree a -> List a
+levelOrder tree =
+    lox [ tree ]
+
+
+levelOrder2 : Tree a -> List ( a, a )
+levelOrder2 tree =
+    lox2 identity [ diagonal tree ]
+
+
+diagonal : Tree a -> Tree ( a, a )
+diagonal tree =
+    Tree.map (\a -> ( a, a )) tree
+
+
+
+--childCount : Tree a -> Tree (a, Int)
+--childCount tree =
+--    Tree.map (\a -> (a, List.length (Tree.children)
+
+
+lox : List (Tree a) -> List a
+lox list =
+    case list of
+        [] ->
+            []
+
+        first :: rest ->
+            Tree.label first :: lox (rest ++ Tree.children first)
+
+
+lox2 : (( a, a ) -> ( a, a )) -> List (Tree ( a, a )) -> List ( a, a )
+lox2 f list =
+    case list of
+        [] ->
+            []
+
+        first :: rest ->
+            let
+                ff =
+                    \( _, y ) -> f ( Tree.label first |> Tuple.first, y )
+            in
+            Tree.label first :: lox2 f rest ++ lox2 ff (Tree.children first)
+
+
+
+--
+--first :: rest ->
+--     if Tree.children first == [] then
+--        first :: lox2 (\( x, y ) -> f ( Tree.label first |> Tuple.first, y )) rest
+--
+--    else
+--        [ Tree.tree (Tree.label first) [] ] ++ lox2 (\( x, y ) -> f ( Tree.label first |> Tuple.first, y )) (Tree.children first) ++ lox2 (\( x, y ) -> f ( Tree.label first |> Tuple.first, y )) rest
+--
+-- LOOP
 
 
 type Step state a
