@@ -46,27 +46,5 @@ main =
             ]
             []
          ]
-            ++ Graph.render (Graph.transform 280 100 40 60 0.5 Example.grr)
+            ++ Graph.render (Graph.transform 280 100 40 60 0.5 Example.graph2)
         )
-
-
-main1 =
-    svg
-        [ width "420"
-        , height "420"
-        , viewBox "0 0 420 420"
-        ]
-        [ rect
-            [ x "10"
-            , y "10"
-            , width "100"
-            , height "100"
-            , rx "15"
-            , ry "15"
-            , fill "white"
-            ]
-            []
-        , svgLine 50 50 150 150 "gray"
-        , svgCircle 50 50 15 "red"
-        , svgCircle 150 150 15 "red"
-        ]

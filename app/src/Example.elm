@@ -1,7 +1,16 @@
-module Example exposing (graph, grr)
+module Example exposing (graph, graph2, grr)
 
 import Graph exposing (Edge, Graph, Node)
+import Tree.Build as Build
 import Tree.Transform
+
+
+tree =
+    Build.fromString "?" identity "1\n 2\n  4\n  5\n  6\n 3\n  7\n   9\n   10\n  8"
+
+
+graph2 =
+    Result.map (Tree.Transform.toGraph 3 identity) tree |> Result.withDefault []
 
 
 gp2 =
