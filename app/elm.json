@@ -13,6 +13,7 @@
             "elm/parser": "1.1.0",
             "elm/svg": "1.0.1",
             "elm-community/list-extra": "8.5.1",
+            "jxxcarlson/htree": "2.0.1",
             "zwilias/elm-rosetree": "1.5.0"
         },
         "indirect": {

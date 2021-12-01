@@ -1,6 +1,7 @@
 module Tree.Transform exposing (..)
 
 import Dict exposing (Dict)
+import HTree
 import List.Extra
 import Tree exposing (Tree)
 import Tree.Graph exposing (Edge, Graph, Node)
@@ -14,6 +15,7 @@ toGraph halfWidth labelToString tree =
 
 type alias State =
     { dict : Dict String Node
+    , depths : Dict String Int
     , groups : List ( ( String, String ), List ( String, String ) )
     , graph : List Edge
     , halfWidth : Float
@@ -23,6 +25,10 @@ type alias State =
 init : Float -> (a -> String) -> Tree a -> State
 init halfWidth renderLabel tree =
     let
+        depths : Dict String Int
+        depths =
+            tree |> Tree.map renderLabel |> HTree.tagWithDepth |> Tree.flatten |> Debug.log "DEPTHS" |> Dict.fromList
+
         edges : List ( String, String )
         edges =
             Lib.edges tree |> List.map (\( a, b ) -> ( renderLabel a, renderLabel b ))
@@ -30,7 +36,6 @@ init halfWidth renderLabel tree =
         edgeGroups : List ( ( String, String ), List ( String, String ) )
         edgeGroups =
             List.Extra.groupWhile (\a b -> Tuple.first a == Tuple.first b) edges
-                -- |> List.map (\( a, b ) -> a :: b)
                 |> Debug.log "EDGE GROUPS"
 
         root : Node
@@ -38,6 +43,7 @@ init halfWidth renderLabel tree =
             { name = Tree.label tree |> renderLabel, x = 0, y = 0, r = 15, color = "red" }
     in
     { dict = Dict.fromList [ ( root.name, root ) ]
+    , depths = depths
     , groups = edgeGroups
     , graph = []
     , halfWidth = halfWidth
@@ -57,11 +63,20 @@ nextStep state =
 
                 Just root ->
                     let
+                        level_ =
+                            Dict.get root.name state.depths |> Maybe.withDefault 1 |> (\x -> x + 1)
+
+                        level =
+                            level_ |> toFloat
+
+                        factor =
+                            0.8 ^ level
+
                         halfWidth =
-                            0.7 * state.halfWidth
+                            factor * state.halfWidth
 
                         newEdges =
-                            groupToEdges root halfWidth (( a, b ) :: rest)
+                            groupToEdges level_ root halfWidth (( a, b ) :: rest)
 
                         newNodes =
                             List.map .to newEdges
@@ -70,10 +85,10 @@ nextStep state =
                             List.foldl (\n runningDict -> Dict.insert n.name n runningDict) state.dict newNodes
                     in
                     Loop
-                        { dict = newDict
-                        , groups = List.drop 1 state.groups
-                        , graph = state.graph ++ newEdges
-                        , halfWidth = halfWidth
+                        { state
+                            | dict = newDict
+                            , groups = List.drop 1 state.groups
+                            , graph = state.graph ++ newEdges
                         }
 
 
@@ -92,9 +107,24 @@ loop s f =
             b
 
 
-xCoordinate : Float -> Int -> Int -> Float -> Float
-xCoordinate origin i n halfWidth =
-    origin - halfWidth + 2 * (toFloat i / toFloat (n // 2)) * halfWidth
+xCoordinate : Int -> Float -> Int -> Int -> Float -> Float
+xCoordinate level origin i n halfWidth =
+    let
+        nn =
+            toFloat n
+    in
+    if n == 1 then
+        origin
+
+    else
+        let
+            f =
+                nn / (nn - 1)
+
+            fi =
+                f * toFloat i - nn / 2 - 0.0 * toFloat (level + 1) * (toFloat i - nn / 2)
+        in
+        origin + 2 * halfWidth * fi / (nn ^ 2)
 
 
 treeRoot : String -> Node
@@ -102,8 +132,8 @@ treeRoot name =
     { name = name, x = 0, y = 0, r = 15, color = "red" }
 
 
-groupToNodes : Node -> Float -> List ( String, String ) -> List Node
-groupToNodes rootNode halfWidth edges =
+groupToNodes : Int -> Node -> Float -> List ( String, String ) -> List Node
+groupToNodes level rootNode halfWidth edges =
     let
         n =
             List.length edges
@@ -115,13 +145,13 @@ groupToNodes rootNode halfWidth edges =
         endPoints =
             List.map Tuple.second edges
     in
-    List.indexedMap (\i na -> { name = na, x = xCoordinate rootNode.x i n halfWidth, y = y, r = 15, color = "red" }) endPoints
+    List.indexedMap (\i na -> { name = na, x = xCoordinate level rootNode.x i n halfWidth, y = y, r = 15, color = "red" }) endPoints
 
 
-groupToEdges : Node -> Float -> List ( String, String ) -> List Edge
-groupToEdges rootNode halfWidth edges =
+groupToEdges : Int -> Node -> Float -> List ( String, String ) -> List Edge
+groupToEdges level rootNode halfWidth edges =
     let
         nodes =
-            groupToNodes rootNode halfWidth edges
+            groupToNodes level rootNode halfWidth edges
     in
     List.map (\n -> { from = rootNode, to = n, color = "gray" }) nodes

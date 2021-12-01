@@ -31,9 +31,9 @@ svgLine x1_ y1_ x2_ y2_ color =
 
 main =
     svg
-        [ width "420"
-        , height "420"
-        , viewBox "0 0 420 420"
+        [ width "900"
+        , height "900"
+        , viewBox "0 0 900 900"
         ]
         ([ rect
             [ x "10"
@@ -46,5 +46,5 @@ main =
             ]
             []
          ]
-            ++ Graph.render (Graph.transform 280 100 40 60 0.5 Example.graph2)
+            ++ Graph.render (Graph.transform 280 100 40 60 0.5 Example.graph)
         )
