@@ -46,5 +46,5 @@ main =
             ]
             []
          ]
-            ++ Graph.render (Graph.transform 280 100 40 60 0.5 Example.graph)
+            ++ Graph.render (Graph.transform 280 100 60 60 0.5 Example.graph)
         )
