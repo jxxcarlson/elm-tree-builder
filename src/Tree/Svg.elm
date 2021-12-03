@@ -23,16 +23,22 @@ import Svg.Attributes exposing (..)
 import Tree.Graph exposing (Edge, Graph, Node)
 
 
+{-| Tranform the charactericxrwe
+-}
 transform : Float -> Float -> Float -> Float -> Float -> Graph -> Graph
 transform dx dy sx sy sr graph =
     List.map (transformEdge dx dy sx sy sr) graph
 
 
+{-| Render a graph to SVG
+-}
 render : Graph -> List (Svg msg)
 render graph =
     List.map renderEdge graph |> List.concat
 
 
+{-| Translate and rescale and edge.
+-}
 transformEdge : Float -> Float -> Float -> Float -> Float -> Edge -> Edge
 transformEdge dx dy sx sy sr edge =
     { edge | from = transformNode dx dy sx sy sr edge.from, to = transformNode dx dy sx sy sr edge.to }

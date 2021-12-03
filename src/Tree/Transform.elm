@@ -14,6 +14,8 @@ import Tree.Graph exposing (Edge, Graph, Node)
 import Tree.Lib as Lib
 
 
+{-| Preferences for function toGraph.
+-}
 type alias Preferences =
     { halfAngle : Float
     , initialEdgeLength : Float
@@ -23,6 +25,9 @@ type alias Preferences =
     }
 
 
+{-| Default Preferences
+-}
+defaults : { halfAngle : Float, initialEdgeLength : number, scaleFactor : Float, ballRadius : number, ballColor : String }
 defaults =
     { halfAngle = 0.25 * pi
     , initialEdgeLength = 2
@@ -32,6 +37,8 @@ defaults =
     }
 
 
+{-| Transform a Tree to a Graph: a data structure that can be rendered to SVG.
+-}
 toGraph : Preferences -> (a -> String) -> Tree a -> Graph
 toGraph preferences labelToString tree =
     loop (init preferences labelToString tree) nextStep
