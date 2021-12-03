@@ -248,11 +248,12 @@ groupToEdges preferences level rootEdge edgesAsLabelPairs =
         dr =
             edgeToVector rootEdge
 
-        u =
-            scalarMul (1 / norm dr) dr
-
         start =
-            displaceEdge (scalarMul preferences.radius u) rootEdge
+            -- displaceEdge (scalarMul preferences.radius u) rootEdge
+            displaceEdge dr rootEdge
+
+        _ =
+            norm (edgeToVector start) |> Debug.log "START, NORM"
 
         endPoints =
             List.map Tuple.second edgesAsLabelPairs
@@ -273,9 +274,9 @@ satellite : Preferences -> Int -> Int -> Int -> String -> Edge -> Edge
 satellite preferences level i n name edge =
     let
         r =
-            preferences.radius ^ (toFloat n * 0.9)
+            preferences.radius
     in
-    rotateAndRescaleEdge 1 (theta preferences.halfAngle i n) edge |> renameEndPoint name
+    rotateAndRescaleEdge r (theta preferences.halfAngle i n) edge |> renameEndPoint name
 
 
 renameEndPoint name edge =

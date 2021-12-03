@@ -7,11 +7,11 @@ import Tree.TransformC
 
 
 tree0 =
-    Build.fromString "?" identity "1\n  2\n  3\n  4\n"
+    Build.fromString "?" identity "1\n  2\n  3\n  4"
 
 
 tree0a =
-    Build.fromString "?" identity "1\n 2\n  3\n  4\n   5\n   6"
+    Build.fromString "?" identity "1\n 2\n 3\n 4\n  5\n  6\n  7b\n  8"
 
 
 tree1 =
@@ -31,7 +31,7 @@ pi =
 
 
 preferences =
-    { halfAngle = pi / 4, radius = 2, rScale = 1.0 }
+    { halfAngle = pi / 4, radius = 1.2, rScale = 1.0 }
 
 
 graph =
