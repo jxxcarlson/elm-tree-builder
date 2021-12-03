@@ -18,12 +18,9 @@ module Tree.Svg exposing (render, transform)
 
 -}
 
-import List.Extra
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Tree exposing (Tree)
 import Tree.Graph exposing (Edge, Graph, Node)
-import Tree.Lib as Lib
 
 
 transform : Float -> Float -> Float -> Float -> Float -> Graph -> Graph
