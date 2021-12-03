@@ -1,7 +1,8 @@
 module Tree.Build exposing (fromString, fromBlocks, forestFromString, forestFromBlocks, Error(..))
 
 {-| Tools for building
-a tree from a string or a list of blocks.
+a tree from a string or a list of blocks. A tree
+is represented in text as an outline:
 
     Example:
 
@@ -15,7 +16,8 @@ a tree from a string or a list of blocks.
 
 The first argument of fromString is a label for a default node.
 The second argument, of type (String -> node), tells how to build a node from a string
-representation of that node.
+representation of that node. Here we use the representation of rose trees of
+[elm/rose-tree](https://package.elm-lang.org/packages/zwilias/elm-rosetree/latest/).
 
 @docs fromString, fromBlocks, forestFromString, forestFromBlocks, Error
 

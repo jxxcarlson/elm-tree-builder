@@ -1,11 +1,39 @@
 module Tree.Svg exposing (render, transform)
 
+{-| Helper functions for rendering trees:
+
+    import Tree.Build
+    import Tree.Transform
+
+    tree =
+        Tree.Build.fromString "?" identity "1\n 2\n 3\n 4\n"
+
+    graph =
+        Result.map (Tree.Transform.toGraph preferences identity) tree |> Result.withDefault []
+
+
+    Tree.Svg.render (Tree.Svg.transform 280 100 60 60 0.5 graph)
+
+@docs render, transform
+
+-}
+
 import List.Extra
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tree exposing (Tree)
 import Tree.Graph exposing (Edge, Graph, Node)
 import Tree.Lib as Lib
+
+
+transform : Float -> Float -> Float -> Float -> Float -> Graph -> Graph
+transform dx dy sx sy sr graph =
+    List.map (transformEdge dx dy sx sy sr) graph
+
+
+render : Graph -> List (Svg msg)
+render graph =
+    List.map renderEdge graph |> List.concat
 
 
 prepareGraph : (a -> String) -> Tree a -> Graph
@@ -23,11 +51,6 @@ prepareGraph nodeToString tree =
     []
 
 
-transform : Float -> Float -> Float -> Float -> Float -> Graph -> Graph
-transform dx dy sx sy sr graph =
-    List.map (transformEdge dx dy sx sy sr) graph
-
-
 transformEdge : Float -> Float -> Float -> Float -> Float -> Edge -> Edge
 transformEdge dx dy sx sy sr edge =
     { edge | from = transformNode dx dy sx sy sr edge.from, to = transformNode dx dy sx sy sr edge.to }
@@ -36,11 +59,6 @@ transformEdge dx dy sx sy sr edge =
 transformNode : Float -> Float -> Float -> Float -> Float -> Node -> Node
 transformNode dx dy sx sy sr node =
     { node | x = sx * node.x + dx, y = sy * node.y + dy, r = sr * node.r }
-
-
-render : Graph -> List (Svg msg)
-render graph =
-    List.map renderEdge graph |> List.concat
 
 
 renderEdge : Edge -> List (Svg msg)

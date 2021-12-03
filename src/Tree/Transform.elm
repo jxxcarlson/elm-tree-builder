@@ -1,4 +1,10 @@
-module Tree.Transform exposing (..)
+module Tree.Transform exposing (Preferences, defaults, toGraph)
+
+{-|
+
+@docs Preferences, defaults, toGraph
+
+-}
 
 import Dict exposing (Dict)
 import HTree
@@ -8,22 +14,40 @@ import Tree.Graph exposing (Edge, Graph, Node)
 import Tree.Lib as Lib
 
 
-toGraph : Float -> (a -> String) -> Tree a -> Graph
-toGraph halfWidth labelToString tree =
-    loop (init halfWidth labelToString tree) nextStep
-
-
-type alias State =
-    { dict : Dict String Node
-    , depths : Dict String Int
-    , groups : List ( ( String, String ), List ( String, String ) )
-    , graph : List Edge
-    , halfWidth : Float
+type alias Preferences =
+    { halfAngle : Float
+    , initialEdgeLength : Float
+    , scaleFactor : Float
+    , ballRadius : Float
+    , ballColor : String
     }
 
 
-init : Float -> (a -> String) -> Tree a -> State
-init halfWidth renderLabel tree =
+defaults =
+    { halfAngle = 0.25 * pi
+    , initialEdgeLength = 2
+    , scaleFactor = 0.8
+    , ballRadius = 0
+    , ballColor = "blue"
+    }
+
+
+toGraph : Preferences -> (a -> String) -> Tree a -> Graph
+toGraph preferences labelToString tree =
+    loop (init preferences labelToString tree) nextStep
+
+
+type alias State =
+    { edgeDict : Dict String Edge
+    , depths : Dict String Int
+    , groups : List ( ( String, String ), List ( String, String ) )
+    , graph : List Edge
+    , preferences : Preferences
+    }
+
+
+init : Preferences -> (a -> String) -> Tree a -> State
+init preferences renderLabel tree =
     let
         depths : Dict String Int
         depths =
@@ -39,13 +63,16 @@ init halfWidth renderLabel tree =
 
         root : Node
         root =
-            { name = Tree.label tree |> renderLabel, x = 0, y = 0, r = 15, color = "red" }
+            { name = Tree.label tree |> renderLabel, x = 0, y = 0, r = preferences.ballRadius, color = preferences.ballColor }
+
+        origin =
+            { name = "origin", x = 0, y = -preferences.initialEdgeLength, r = preferences.ballRadius, color = preferences.ballColor }
     in
-    { dict = Dict.fromList [ ( root.name, root ) ]
+    { edgeDict = Dict.fromList [ ( root.name, { from = origin, to = root, color = "gray" } ) ]
     , depths = depths
     , groups = edgeGroups
     , graph = []
-    , halfWidth = halfWidth
+    , preferences = preferences
     }
 
 
@@ -56,36 +83,33 @@ nextStep state =
             Done state.graph
 
         Just ( ( a, b ), rest ) ->
-            case Dict.get a state.dict of
+            case Dict.get a state.edgeDict of
                 Nothing ->
                     Done state.graph
 
-                Just root ->
+                Just edge ->
                     let
+                        endPointNames : List String
+                        endPointNames =
+                            b :: List.map Tuple.second rest
+
+                        namePairs : List ( String, String )
+                        namePairs =
+                            ( a, b ) :: rest
+
                         level_ =
-                            Dict.get root.name state.depths |> Maybe.withDefault 1 |> (\x -> x + 1)
+                            Dict.get edge.to.name state.depths |> Maybe.withDefault 1 |> (\x -> x + 1)
 
-                        level =
-                            level_ |> toFloat
-
-                        factor =
-                            0.8 ^ level
-
-                        halfWidth =
-                            factor * state.halfWidth
-
+                        newEdges : List Edge
                         newEdges =
-                            groupToEdges level_ root halfWidth (( a, b ) :: rest)
-
-                        newNodes =
-                            List.map .to newEdges
+                            groupToEdges state.preferences level_ edge namePairs
 
                         newDict =
-                            List.foldl (\n runningDict -> Dict.insert n.name n runningDict) state.dict newNodes
+                            List.foldl (\e runningDict -> Dict.insert e.to.name e runningDict) state.edgeDict newEdges
                     in
                     Loop
                         { state
-                            | dict = newDict
+                            | edgeDict = newDict
                             , groups = List.drop 1 state.groups
                             , graph = state.graph ++ newEdges
                         }
@@ -106,51 +130,150 @@ loop s f =
             b
 
 
-xCoordinate : Int -> Float -> Int -> Int -> Float -> Float
-xCoordinate level origin i n halfWidth =
-    let
-        nn =
-            toFloat n
-    in
-    if n == 1 then
-        origin
+pi =
+    3.1416
+
+
+theta halfAngle i n =
+    if n < 2 then
+        0
 
     else
-        let
-            f =
-                nn / (nn - 1)
-
-            fi =
-                f * toFloat i - nn / 2 - 0.0 * toFloat (level + 1) * (toFloat i - nn / 2)
-        in
-        origin + 2 * halfWidth * fi / (nn ^ 2)
+        -halfAngle + (2 * toFloat i * halfAngle) / (toFloat n - 1)
 
 
-treeRoot : String -> Node
-treeRoot name =
-    { name = name, x = 0, y = 0, r = 15, color = "red" }
+norm : Vector -> Float
+norm v =
+    sqrt (v.x * v.x + v.y * v.y)
 
 
-groupToNodes : Int -> Node -> Float -> List ( String, String ) -> List Node
-groupToNodes level rootNode halfWidth edges =
+subtract : Vector -> Vector -> Vector
+subtract a b =
+    { x = a.x - b.x, y = a.y - b.y }
+
+
+add : Vector -> Vector -> Vector
+add a b =
+    { x = a.x + b.x, y = a.y - b.y }
+
+
+scalarMul : Float -> Vector -> Vector
+scalarMul c v =
+    { x = c * v.x, y = c * v.y }
+
+
+type alias Vector =
+    { x : Float, y : Float }
+
+
+edgeToVector : Edge -> Vector
+edgeToVector edge =
+    { x = edge.to.x - edge.from.x, y = edge.to.y - edge.from.y }
+
+
+nodeToVector : Node -> Vector
+nodeToVector node =
+    { x = node.x, y = node.y }
+
+
+vectorToNode : String -> String -> Float -> Vector -> Node
+vectorToNode name color radius vec =
+    { name = name, color = color, r = radius, x = vec.x, y = vec.y }
+
+
+displaceEdge : Vector -> Edge -> Edge
+displaceEdge vector edge =
+    { edge | from = displaceNode vector edge.from, to = displaceNode vector edge.to }
+
+
+displaceNode : Vector -> Node -> Node
+displaceNode vector node =
+    { node | x = node.x + vector.x, y = node.y + vector.y }
+
+
+rotateEdge : Float -> Edge -> Edge
+rotateEdge theta_ edge =
+    let
+        dx =
+            edge.to.x - edge.from.x
+
+        dy =
+            edge.to.y - edge.from.y
+
+        co =
+            cos theta_
+
+        si =
+            sin theta_
+
+        xx =
+            edge.from.x + co * dx - si * dy
+
+        yy =
+            edge.from.y + si * dx + co * dy
+
+        to =
+            edge.to
+    in
+    { edge | to = { to | x = xx, y = yy } }
+
+
+rotateAndRescaleEdge : Float -> Float -> Edge -> Edge
+rotateAndRescaleEdge scaleFacgtor theta_ edge =
+    let
+        dx =
+            edge.to.x - edge.from.x
+
+        dy =
+            edge.to.y - edge.from.y
+
+        co =
+            cos theta_
+
+        si =
+            sin theta_
+
+        xx =
+            edge.from.x + scaleFacgtor * (co * dx - si * dy)
+
+        yy =
+            edge.from.y + scaleFacgtor * (si * dx + co * dy)
+
+        to =
+            edge.to
+    in
+    { edge | to = { to | x = xx, y = yy } }
+
+
+groupToEdges : Preferences -> Int -> Edge -> List ( String, String ) -> List Edge
+groupToEdges preferences level rootEdge edgesAsLabelPairs =
     let
         n =
-            List.length edges
+            List.length edgesAsLabelPairs
 
-        y =
-            rootNode.y + 1
+        dr =
+            edgeToVector rootEdge
 
-        endPoints : List String
+        start =
+            displaceEdge dr rootEdge
+
         endPoints =
-            List.map Tuple.second edges
+            List.map Tuple.second edgesAsLabelPairs
+
+        newEdges =
+            List.indexedMap (\i na -> satellite preferences level i n na start) endPoints
     in
-    List.indexedMap (\i na -> { name = na, x = xCoordinate level rootNode.x i n halfWidth, y = y, r = 15, color = "red" }) endPoints
+    newEdges
 
 
-groupToEdges : Int -> Node -> Float -> List ( String, String ) -> List Edge
-groupToEdges level rootNode halfWidth edges =
+satellite : Preferences -> Int -> Int -> Int -> String -> Edge -> Edge
+satellite preferences level i n name edge =
+    rotateAndRescaleEdge preferences.scaleFactor (theta preferences.halfAngle i n) edge |> renameEndPoint name
+
+
+renameEndPoint name edge =
     let
-        nodes =
-            groupToNodes level rootNode halfWidth edges
+        to =
+            edge.to
     in
-    List.map (\n -> { from = rootNode, to = n, color = "gray" }) nodes
+    { edge | to = { to | name = name } }

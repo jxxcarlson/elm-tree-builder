@@ -27,7 +27,14 @@ levelOrder tree =
     lox [ tree ]
 
 
-{-| -}
+{-|
+
+    Return a list of pairs (x,y) where
+
+        - x and y are of type a
+        - (x,y) is in the list if and only if y is a chiild of x.
+
+-}
 edges : Tree a -> List ( a, a )
 edges tree =
     let

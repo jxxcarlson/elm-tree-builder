@@ -1,4 +1,10 @@
-module Tree.Random exposing (depths, generate, generateOutline)
+module Tree.Random exposing (generate, generateOutline, depths)
+
+{-| Utilities for generating and collecting statistics on random trees.
+
+@docs generate, generateOutline, depths
+
+-}
 
 import List.Extra
 import Random
@@ -7,16 +13,20 @@ import Tree.Build as Build exposing (Error)
 import Tree.Extra
 
 
-{-| -}
+{-| Generate a random rose tree with the given number nodes
+and with given seed.
+-}
 generate : Int -> Int -> Result Error (Tree String)
-generate maxCount seed =
-    generateOutline maxCount seed
+generate maxNodes seed =
+    generateOutline maxNodes seed
         |> Build.fromString "?" identity
 
 
+{-| Generate a random outline.
+-}
 generateOutline : Int -> Int -> String
-generateOutline maxCount seed =
-    loop (init maxCount seed) nextStep
+generateOutline maxEntries seed =
+    loop (init maxEntries seed) nextStep
 
 
 initialData =
@@ -114,8 +124,24 @@ nextStep state =
             }
 
 
-depths nodes steps =
-    List.foldl (\n acc -> (generate nodes n |> Result.toMaybe |> Maybe.map Tree.Extra.depth |> Maybe.withDefault 0) :: acc) [] (List.range 0 steps)
+{-|
+
+    depths k n seed:  generate n random trees of k nodes using the given seed
+    and collect statistics on their depths
+
+    > depths 10 10 0
+    [(2,1),(3,2),(4,3),(5,2),(8,2)] -- one tree of depth two, two trees of depth three, etc.
+
+    > depths 10 10 1
+    [(2,1),(3,1),(4,3),(5,2),(7,1),(8,2)]
+
+    > depths 10 10 2
+    [(2,1),(3,2),(4,3),(5,2),(7,1),(8,1)]
+
+-}
+depths : Int -> Int -> Int -> List ( Int, Int )
+depths numberOfNodes numberOfTrees seed =
+    List.foldl (\n acc -> (generate numberOfNodes (n + seed) |> Result.toMaybe |> Maybe.map Tree.Extra.depth |> Maybe.withDefault 0) :: acc) [] (List.range 0 (numberOfTrees - 1))
         |> List.sort
         |> List.Extra.group
         |> List.map (\( a, b ) -> ( a, List.length b + 1 ))

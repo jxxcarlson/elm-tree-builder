@@ -1,32 +1,22 @@
 module Main exposing (..)
 
-import Example
-import Graph
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Tree.Build as Build
+import Tree.Svg
+import Tree.Transform exposing (defaults)
 
 
-svgCircle : Float -> Float -> Float -> String -> Svg msg
-svgCircle x y rr color =
-    circle
-        [ cx (String.fromFloat x)
-        , cy (String.fromFloat y)
-        , r (String.fromFloat rr)
-        , fill color
-        ]
-        []
+tree =
+    Build.fromString "?" identity "1\n 2\n  4\n  u\n  5\n   a\n  6\n 3\n  7\n   9\n   10\n  8\n   x\n   y\n    z1\n    z2\n    z3"
 
 
-svgLine : Float -> Float -> Float -> Float -> String -> Svg msg
-svgLine x1_ y1_ x2_ y2_ color =
-    line
-        [ x1 (String.fromFloat x1_)
-        , y1 (String.fromFloat y1_)
-        , x2 (String.fromFloat x2_)
-        , y2 (String.fromFloat y2_)
-        , stroke color
-        ]
-        []
+graph =
+    Result.map (Tree.Transform.toGraph preferences identity) tree |> Result.withDefault []
+
+
+preferences =
+    { defaults | ballRadius = 10 }
 
 
 main =
@@ -46,5 +36,5 @@ main =
             ]
             []
          ]
-            ++ Graph.render (Graph.transform 280 100 60 60 0.5 Example.graph)
+            ++ Tree.Svg.render (Tree.Svg.transform 280 100 60 60 0.5 graph)
         )
