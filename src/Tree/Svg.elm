@@ -36,21 +36,6 @@ render graph =
     List.map renderEdge graph |> List.concat
 
 
-prepareGraph : (a -> String) -> Tree a -> Graph
-prepareGraph nodeToString tree =
-    let
-        edges : List ( String, String )
-        edges =
-            Lib.edges tree |> List.map (\( a, b ) -> ( nodeToString a, nodeToString b ))
-
-        edgeGroups : List (List ( String, String ))
-        edgeGroups =
-            List.Extra.groupWhile (\a b -> Tuple.first a == Tuple.first b) edges
-                |> List.map (\( a, b ) -> a :: b)
-    in
-    []
-
-
 transformEdge : Float -> Float -> Float -> Float -> Float -> Edge -> Edge
 transformEdge dx dy sx sy sr edge =
     { edge | from = transformNode dx dy sx sy sr edge.from, to = transformNode dx dy sx sy sr edge.to }
