@@ -10,8 +10,11 @@ import Tree.Lib as Lib
 
 type alias Preferences =
     { halfAngle : Float
-    , radius : Float
+    , initialEdgeLength : Float
+    , scaleFactor : Float
     , rScale : Float
+    , ballRadius : Float
+    , ballColor : String
     }
 
 
@@ -47,12 +50,12 @@ init preferences renderLabel tree =
 
         root : Node
         root =
-            { name = Tree.label tree |> renderLabel, x = 0, y = 0, r = 15, color = "red" }
+            { name = Tree.label tree |> renderLabel, x = 0, y = 0, r = preferences.ballRadius, color = preferences.ballColor }
 
         origin =
-            { name = "origin", x = 0, y = -preferences.radius, r = 15, color = "red" }
+            { name = "origin", x = 0, y = -preferences.initialEdgeLength, r = preferences.ballRadius, color = preferences.ballColor }
     in
-    { edgeDict = Dict.fromList [ ( root.name, { from = origin, to = root, color = "blue" } ) ]
+    { edgeDict = Dict.fromList [ ( root.name, { from = origin, to = root, color = "gray" } ) ]
     , depths = depths
     , groups = edgeGroups
     , graph = []
@@ -73,6 +76,9 @@ nextStep state =
 
                 Just edge ->
                     let
+                        _ =
+                            Debug.log "EDGE" ( ( edge.from.name, edge.from.r ), ( edge.to.name, edge.to.r ) )
+
                         endPointNames : List String
                         endPointNames =
                             b :: List.map Tuple.second rest
@@ -129,11 +135,6 @@ theta halfAngle i n =
         -halfAngle + (2 * toFloat i * halfAngle) / (toFloat n - 1)
     )
         |> Debug.log "THETA"
-
-
-treeRoot : String -> Node
-treeRoot name =
-    { name = name, x = 0, y = 0, r = 15, color = "red" }
 
 
 norm : Vector -> Float
@@ -249,7 +250,6 @@ groupToEdges preferences level rootEdge edgesAsLabelPairs =
             edgeToVector rootEdge
 
         start =
-            -- displaceEdge (scalarMul preferences.radius u) rootEdge
             displaceEdge dr rootEdge
 
         _ =
@@ -274,7 +274,7 @@ satellite : Preferences -> Int -> Int -> Int -> String -> Edge -> Edge
 satellite preferences level i n name edge =
     let
         r =
-            preferences.radius
+            preferences.scaleFactor
     in
     rotateAndRescaleEdge r (theta preferences.halfAngle i n) edge |> renameEndPoint name
 

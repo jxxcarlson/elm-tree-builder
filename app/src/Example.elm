@@ -31,7 +31,13 @@ pi =
 
 
 preferences =
-    { halfAngle = pi / 4, radius = 1.2, rScale = 1.0 }
+    { halfAngle = 0.23 * pi
+    , initialEdgeLength = 2
+    , scaleFactor = 0.9
+    , rScale = 1.0
+    , ballRadius = 0
+    , ballColor = "blue"
+    }
 
 
 graph =
