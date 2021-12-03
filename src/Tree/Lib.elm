@@ -36,14 +36,14 @@ edges tree =
 
         t1 : List ( a, Int )
         t1 =
-            (\tt -> preorderF f tt) tree |> Debug.log "T1"
+            (\tt -> preorderF f tt) tree
 
         l1 : List a
         l1 =
-            repeatF t1 |> Debug.log "L1"
+            repeatF t1
 
         l2 =
-            levelOrder tree |> Debug.log "L2"
+            levelOrder tree
     in
     List.map2 (\a b -> ( a, b )) l1 (List.drop 1 l2)
 

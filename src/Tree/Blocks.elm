@@ -67,7 +67,7 @@ more quanta.
 -}
 quantumOfBlocks : List Block -> Int
 quantumOfBlocks blocks =
-    blocks |> Debug.log "Q, Blocks" |> List.map .indent |> differences |> List.filter (\n -> n > 0) |> Math.gcdList
+    blocks |> List.map .indent |> differences |> List.filter (\n -> n > 0) |> Math.gcdList
 
 
 {-| Determine if a list of blocks is well-formed, meaning that when
@@ -90,7 +90,7 @@ wellFormed : List Block -> ( Int, Bool )
 wellFormed blocks =
     let
         quantum =
-            quantumOfBlocks blocks |> Debug.log "QUANTUM"
+            quantumOfBlocks blocks
 
         outliers =
             blocks
@@ -98,7 +98,6 @@ wellFormed blocks =
                 |> differences
                 |> List.map (\k -> k // quantum)
                 |> List.filter (\n -> n > 1)
-                |> Debug.log "OUTLIERS"
     in
     ( quantum, List.length outliers == 0 )
 

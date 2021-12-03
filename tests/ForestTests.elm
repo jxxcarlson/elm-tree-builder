@@ -17,7 +17,7 @@ testForestNumber : Int -> String -> String -> Test
 testForestNumber expectedNumber label str =
     test label <|
         \_ ->
-            Build.forestFromString "?" identity identity str |> Debug.log "FOREST" |> Result.map List.length |> Expect.equal (Ok expectedNumber)
+            Build.forestFromString "?" identity identity str |> Result.map List.length |> Expect.equal (Ok expectedNumber)
 
 
 suite : Test

@@ -30,15 +30,5 @@ pi =
     3.1416
 
 
-preferences =
-    { halfAngle = 0.23 * pi
-    , initialEdgeLength = 2
-    , scaleFactor = 0.9
-    , rScale = 1.0
-    , ballRadius = 0
-    , ballColor = "blue"
-    }
-
-
 graph =
-    Result.map (Tree.TransformC.toGraph preferences identity) tree3 |> Result.withDefault []
+    Result.map (Tree.TransformC.toGraph Tree.TransformC.defaults identity) tree3 |> Result.withDefault []

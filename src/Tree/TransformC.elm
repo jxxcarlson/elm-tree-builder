@@ -12,9 +12,17 @@ type alias Preferences =
     { halfAngle : Float
     , initialEdgeLength : Float
     , scaleFactor : Float
-    , rScale : Float
     , ballRadius : Float
     , ballColor : String
+    }
+
+
+defaults =
+    { halfAngle = 0.25 * pi
+    , initialEdgeLength = 2
+    , scaleFactor = 0.8
+    , ballRadius = 0
+    , ballColor = "blue"
     }
 
 
@@ -37,7 +45,7 @@ init preferences renderLabel tree =
     let
         depths : Dict String Int
         depths =
-            tree |> Tree.map renderLabel |> HTree.tagWithDepth |> Tree.flatten |> Debug.log "DEPTHS" |> Dict.fromList
+            tree |> Tree.map renderLabel |> HTree.tagWithDepth |> Tree.flatten |> Dict.fromList
 
         edges : List ( String, String )
         edges =
@@ -46,7 +54,6 @@ init preferences renderLabel tree =
         edgeGroups : List ( ( String, String ), List ( String, String ) )
         edgeGroups =
             List.Extra.groupWhile (\a b -> Tuple.first a == Tuple.first b) edges
-                |> Debug.log "EDGE GROUPS"
 
         root : Node
         root =
@@ -76,9 +83,6 @@ nextStep state =
 
                 Just edge ->
                     let
-                        _ =
-                            Debug.log "EDGE" ( ( edge.from.name, edge.from.r ), ( edge.to.name, edge.to.r ) )
-
                         endPointNames : List String
                         endPointNames =
                             b :: List.map Tuple.second rest
@@ -93,9 +97,6 @@ nextStep state =
                         newEdges : List Edge
                         newEdges =
                             groupToEdges state.preferences level_ edge namePairs
-
-                        _ =
-                            Debug.log "NORMS (1)" (List.map (edgeToVector >> norm) newEdges)
 
                         newDict =
                             List.foldl (\e runningDict -> Dict.insert e.to.name e runningDict) state.edgeDict newEdges
@@ -128,13 +129,11 @@ pi =
 
 
 theta halfAngle i n =
-    (if n < 2 then
+    if n < 2 then
         0
 
-     else
+    else
         -halfAngle + (2 * toFloat i * halfAngle) / (toFloat n - 1)
-    )
-        |> Debug.log "THETA"
 
 
 norm : Vector -> Float
@@ -253,19 +252,13 @@ groupToEdges preferences level rootEdge edgesAsLabelPairs =
             displaceEdge dr rootEdge
 
         _ =
-            norm (edgeToVector start) |> Debug.log "START, NORM"
+            norm (edgeToVector start)
 
         endPoints =
             List.map Tuple.second edgesAsLabelPairs
 
         newEdges =
             List.indexedMap (\i na -> satellite preferences level i n na start) endPoints
-
-        _ =
-            Debug.log "NORMS" (List.map (edgeToVector >> norm) newEdges)
-
-        _ =
-            Debug.log "NAMES" (List.map (.to >> .name) newEdges)
     in
     newEdges
 

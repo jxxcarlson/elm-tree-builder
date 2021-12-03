@@ -27,7 +27,7 @@ init halfWidth renderLabel tree =
     let
         depths : Dict String Int
         depths =
-            tree |> Tree.map renderLabel |> HTree.tagWithDepth |> Tree.flatten |> Debug.log "DEPTHS" |> Dict.fromList
+            tree |> Tree.map renderLabel |> HTree.tagWithDepth |> Tree.flatten |> Dict.fromList
 
         edges : List ( String, String )
         edges =
@@ -36,7 +36,6 @@ init halfWidth renderLabel tree =
         edgeGroups : List ( ( String, String ), List ( String, String ) )
         edgeGroups =
             List.Extra.groupWhile (\a b -> Tuple.first a == Tuple.first b) edges
-                |> Debug.log "EDGE GROUPS"
 
         root : Node
         root =

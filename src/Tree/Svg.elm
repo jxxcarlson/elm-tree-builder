@@ -19,7 +19,6 @@ prepareGraph nodeToString tree =
         edgeGroups =
             List.Extra.groupWhile (\a b -> Tuple.first a == Tuple.first b) edges
                 |> List.map (\( a, b ) -> a :: b)
-                |> Debug.log "EDGE GROUPS"
     in
     []
 

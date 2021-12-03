@@ -114,7 +114,6 @@ forestFromString : a -> (String -> a) -> (a -> String) -> String -> Result Error
 forestFromString defaultNode makeNode renderNode str =
     str
         |> Blocks.fromStringAsLines
-        |> Debug.log "BLOCKS"
         |> forestFromBlocks defaultNode makeNode renderNode
 
 
@@ -131,7 +130,7 @@ forestFromBlocks defaultNode makeNode renderNode blocks =
 
         blocks2 : List Block
         blocks2 =
-            { content = renderNode defaultNode, indent = 0 } :: blocks1 |> Debug.log "BLOCKS2"
+            { content = renderNode defaultNode, indent = 0 } :: blocks1
     in
     fromBlocks defaultNode makeNode blocks2 |> Result.map Tree.children
 
