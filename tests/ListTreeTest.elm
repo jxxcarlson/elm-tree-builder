@@ -1,9 +1,7 @@
-module ListTreeTest exposing (..)
+module ListTreeTest exposing (a, b, makeNode, renderNode, suite, testItem)
 
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer)
-import Test exposing (..)
-import Tree.Random
+import Expect
+import Test exposing (Test, describe, test)
 import Tree.Test as T
 
 

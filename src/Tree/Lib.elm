@@ -10,7 +10,7 @@ if and only if q is a child of p.
 
 -}
 
-import Tree exposing (Tree(..))
+import Tree exposing (Tree)
 import Tree.Zipper as Zipper exposing (Zipper)
 
 

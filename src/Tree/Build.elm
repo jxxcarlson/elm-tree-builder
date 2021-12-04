@@ -23,22 +23,9 @@ representation of that node. Here we use the representation of rose trees of
 
 -}
 
-import Tree exposing (Tree(..))
+import Tree exposing (Tree)
 import Tree.Blocks as Blocks exposing (Block)
-import Tree.Zipper as Zipper exposing (Zipper(..))
-
-
-
---
---{-| Example for trees whose nodes labeled by lists of Ints:
---
---    makeNode : String -> List Int
---    makeNode content =
---        content
---            |> String.split ","
---            |> List.map (\s -> String.toInt s |> Maybe.withDefault 0)
---
----}
+import Tree.Zipper as Zipper exposing (Zipper)
 
 
 {-| -}

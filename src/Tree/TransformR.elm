@@ -1,4 +1,4 @@
-module Tree.TransformR exposing (..)
+module Tree.TransformR exposing (State, Step(..), groupToEdges, groupToNodes, init, loop, nextStep, toGraph, treeRoot, xCoordinate)
 
 import Dict exposing (Dict)
 import HTree

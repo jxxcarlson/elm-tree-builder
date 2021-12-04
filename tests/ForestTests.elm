@@ -1,7 +1,7 @@
-module ForestTests exposing (..)
+module ForestTests exposing (a, aa, b, c, suite, testForestNumber, testItem, x)
 
-import Expect exposing (Expectation)
-import Test exposing (..)
+import Expect
+import Test exposing (Test, describe, test)
 import Tree.Build as Build
 import Tree.Test as T
 

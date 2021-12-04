@@ -1,8 +1,8 @@
-module StringTreeTest exposing (..)
+module StringTreeTest exposing (a, b, c, d, fuzzSuite, fuzzTest, fuzzTestAux, suite, testItem)
 
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer)
-import Test exposing (..)
+import Expect
+import Fuzz
+import Test exposing (Test, describe, fuzz2, test)
 import Tree.Blocks as Blocks
 import Tree.Random
 import Tree.Test as T

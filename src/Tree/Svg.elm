@@ -23,7 +23,7 @@ import Svg.Attributes exposing (..)
 import Tree.Graph exposing (Edge, Graph, Node)
 
 
-{-| Tranform the charactericxrwe
+{-| Transform: shift by (dx, dy) and rescale by (sx,sy,sr)
 -}
 transform : Float -> Float -> Float -> Float -> Float -> Graph -> Graph
 transform dx dy sx sy sr graph =

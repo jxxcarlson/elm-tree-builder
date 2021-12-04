@@ -11,6 +11,14 @@ when inside the directory containing this file.
 
 -}
 
+import CognitiveComplexity
+import NoExposingEverything
+import NoImportingEverything
+import NoUnused.CustomTypeConstructors
+import NoUnused.Dependencies
+import NoUnused.Parameters
+import NoUnused.Patterns
+import NoUnused.Variables
 import Review.Rule exposing (Rule)
 
 

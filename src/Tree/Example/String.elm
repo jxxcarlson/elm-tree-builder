@@ -1,4 +1,4 @@
-module Tree.Example.String exposing (..)
+module Tree.Example.String exposing (data, data2, f, r, testResult, tree)
 
 {-|
 
@@ -19,7 +19,6 @@ module Tree.Example.String exposing (..)
 
 -}
 
-import Tree.Blocks as Blocks
 import Tree.Build as Build
 import Tree.Lib as Lib
 import Tree.Random
@@ -48,9 +47,6 @@ f maxCount seed =
     let
         outline =
             Tree.Random.generateOutline maxCount seed
-
-        ( quantum, _ ) =
-            outline |> Blocks.fromStringAsLines |> Blocks.wellFormed
     in
     Lib.test 1 "?" identity identity outline
 

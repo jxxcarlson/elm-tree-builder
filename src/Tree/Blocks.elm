@@ -233,31 +233,3 @@ loop s f =
 
         Done b ->
             b
-
-
-example =
-    """
-This is a test.
-And so is this.
-
-Roses are red.
-Violets are blue.
-
-Matter is made of atoms.
-They are very small.
-
-"""
-
-
-example2 =
-    """
-This is a test.
-And so is this.
-
-  Roses are red.
-  Violets are blue.
-
-    Matter is made of atoms.
-    They are very small.
-
-"""

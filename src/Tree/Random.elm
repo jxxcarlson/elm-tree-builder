@@ -29,12 +29,6 @@ generateOutline maxEntries seed =
     loop (init maxEntries seed) nextStep
 
 
-initialData =
-    { defaultNode = "?"
-    , makeNode = identity
-    }
-
-
 type alias State =
     { seed : Random.Seed
     , count : Int
@@ -47,8 +41,8 @@ type alias State =
 init : Int -> Int -> State
 init maxCount seed =
     let
-        ( k, newSeed ) =
-            rng 0 (Random.initialSeed seed)
+        ( _, newSeed ) =
+            rng (Random.initialSeed seed)
     in
     { seed = newSeed
     , count = 1
@@ -81,8 +75,8 @@ valueOf move =
             -2
 
 
-rng : Int -> Random.Seed -> ( Move, Random.Seed )
-rng indent seed =
+rng : Random.Seed -> ( Move, Random.Seed )
+rng seed =
     let
         ( move, s1 ) =
             Random.step (Random.weighted ( 40, Forward ) [ ( 25, Stay ), ( 40, Forward ), ( 25, Back ), ( 10, BackTwice ) ]) seed
@@ -98,7 +92,7 @@ nextStep state =
     else
         let
             ( move, seed ) =
-                rng state.indent state.seed
+                rng state.seed
 
             indentaAfterRoot =
                 -- After the root, indentation must be at least 1 and cannot be one more

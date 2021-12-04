@@ -96,20 +96,13 @@ nextStep state =
 
                 Just edge ->
                     let
-                        endPointNames : List String
-                        endPointNames =
-                            b :: List.map Tuple.second rest
-
                         namePairs : List ( String, String )
                         namePairs =
                             ( a, b ) :: rest
 
-                        level_ =
-                            Dict.get edge.to.name state.depths |> Maybe.withDefault 1 |> (\x -> x + 1)
-
                         newEdges : List Edge
                         newEdges =
-                            groupToEdges state.preferences level_ edge namePairs
+                            groupToEdges state.preferences edge namePairs
 
                         newDict =
                             List.foldl (\e runningDict -> Dict.insert e.to.name e runningDict) state.edgeDict newEdges
@@ -149,26 +142,6 @@ theta halfAngle i n =
         -halfAngle + (2 * toFloat i * halfAngle) / (toFloat n - 1)
 
 
-norm : Vector -> Float
-norm v =
-    sqrt (v.x * v.x + v.y * v.y)
-
-
-subtract : Vector -> Vector -> Vector
-subtract a b =
-    { x = a.x - b.x, y = a.y - b.y }
-
-
-add : Vector -> Vector -> Vector
-add a b =
-    { x = a.x + b.x, y = a.y - b.y }
-
-
-scalarMul : Float -> Vector -> Vector
-scalarMul c v =
-    { x = c * v.x, y = c * v.y }
-
-
 type alias Vector =
     { x : Float, y : Float }
 
@@ -176,16 +149,6 @@ type alias Vector =
 edgeToVector : Edge -> Vector
 edgeToVector edge =
     { x = edge.to.x - edge.from.x, y = edge.to.y - edge.from.y }
-
-
-nodeToVector : Node -> Vector
-nodeToVector node =
-    { x = node.x, y = node.y }
-
-
-vectorToNode : String -> String -> Float -> Vector -> Node
-vectorToNode name color radius vec =
-    { name = name, color = color, r = radius, x = vec.x, y = vec.y }
 
 
 displaceEdge : Vector -> Edge -> Edge
@@ -196,33 +159,6 @@ displaceEdge vector edge =
 displaceNode : Vector -> Node -> Node
 displaceNode vector node =
     { node | x = node.x + vector.x, y = node.y + vector.y }
-
-
-rotateEdge : Float -> Edge -> Edge
-rotateEdge theta_ edge =
-    let
-        dx =
-            edge.to.x - edge.from.x
-
-        dy =
-            edge.to.y - edge.from.y
-
-        co =
-            cos theta_
-
-        si =
-            sin theta_
-
-        xx =
-            edge.from.x + co * dx - si * dy
-
-        yy =
-            edge.from.y + si * dx + co * dy
-
-        to =
-            edge.to
-    in
-    { edge | to = { to | x = xx, y = yy } }
 
 
 rotateAndRescaleEdge : Float -> Float -> Edge -> Edge
@@ -252,8 +188,8 @@ rotateAndRescaleEdge scaleFacgtor theta_ edge =
     { edge | to = { to | x = xx, y = yy } }
 
 
-groupToEdges : Preferences -> Int -> Edge -> List ( String, String ) -> List Edge
-groupToEdges preferences level rootEdge edgesAsLabelPairs =
+groupToEdges : Preferences -> Edge -> List ( String, String ) -> List Edge
+groupToEdges preferences rootEdge edgesAsLabelPairs =
     let
         n =
             List.length edgesAsLabelPairs
@@ -268,13 +204,13 @@ groupToEdges preferences level rootEdge edgesAsLabelPairs =
             List.map Tuple.second edgesAsLabelPairs
 
         newEdges =
-            List.indexedMap (\i na -> satellite preferences level i n na start) endPoints
+            List.indexedMap (\i na -> satellite preferences i n na start) endPoints
     in
     newEdges
 
 
-satellite : Preferences -> Int -> Int -> Int -> String -> Edge -> Edge
-satellite preferences level i n name edge =
+satellite : Preferences -> Int -> Int -> String -> Edge -> Edge
+satellite preferences i n name edge =
     rotateAndRescaleEdge preferences.scaleFactor (theta preferences.halfAngle i n) edge |> renameEndPoint name
 
 

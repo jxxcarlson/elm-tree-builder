@@ -1,4 +1,4 @@
-module Tree.Example.List exposing (..)
+module Tree.Example.List exposing (data, data2, data3, makeNode, renderNode, tree)
 
 {-|
 
@@ -19,8 +19,7 @@ module Tree.Example.List exposing (..)
 
 -}
 
-import Tree.Build as Build exposing (InitialData)
-import Tree.Lib as Lib
+import Tree.Build as Build
 
 
 makeNode : String -> List Int
@@ -35,22 +34,8 @@ renderNode ks =
     List.map String.fromInt ks |> String.join ","
 
 
-initialData quant =
-    { , defaultNode = []
-    , makeNode = makeNode
-    }
-
-
 tree =
-    Build.fromString (initialData 1) data2
-
-
-test k str =
-    Lib.test k renderNode (initialData k) str
-
-
-testResult =
-    test 1 data2
+    Build.fromString [] makeNode data2
 
 
 data =
