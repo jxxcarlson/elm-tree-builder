@@ -5,10 +5,75 @@ import Svg.Attributes exposing (..)
 import Tree.Build as Build
 import Tree.Svg
 import Tree.Transform exposing (defaults)
+import Tree.TransformR as TR
 
 
 tree1 =
-    Build.fromString "?" identity "1 Intro\n 2 Home\n  3 Pets\n  4 Garden\n   5 Trees\n   6 Shrubs\n   7 Flowers"
+    Build.fromString "?" identity forestData
+
+
+forestData =
+    """
+*
+  1
+    2
+    3
+  4
+    5
+    6
+"""
+
+
+forestData1 =
+    """
+*
+ 1
+  2
+  3
+ 4
+  5
+  6
+"""
+
+
+str =
+    """
+1
+ 2
+  3
+   4
+   5
+  6
+ 7
+"""
+
+
+str2 =
+    """
+1
+ 2
+  3
+   4
+   5
+  6
+ 7
+  8
+   9
+   10
+   11
+"""
+
+
+outline =
+    """
+1 Home
+  2 Important things (according to Cicero)
+    3 Library
+    4 Garden
+      5 Pond
+      6 Grasses
+      7 Flowers
+"""
 
 
 tree2 =
@@ -20,18 +85,22 @@ tree2 =
 
 
 graph =
-    Result.map (Tree.Transform.toGraph preferences identity) tree2 |> Result.withDefault []
+    Result.map (Tree.Transform.toGraph preferences identity) tree1 |> Result.withDefault []
+
+
+graph1 =
+    Result.map (TR.toGraph 3 identity) tree1 |> Result.withDefault []
 
 
 preferences =
-    { defaults | ballRadius = 10, halfAngle = 0.23 * pi, scaleFactor = 1 }
+    { defaults | ballRadius = 10, halfAngle = 0.1 * pi, scaleFactor = 0.85 }
 
 
 main =
     svg
         [ width "900"
         , height "900"
-        , viewBox "0 0 900 900"
+        , viewBox "0 0 1000 1000"
         ]
         ([ rect
             [ x "10"
@@ -44,5 +113,5 @@ main =
             ]
             []
          ]
-            ++ Tree.Svg.render Tree.Svg.FirstWord (Tree.Svg.transform 280 100 60 60 0.5 graph)
+            ++ Tree.Svg.render Tree.Svg.FullLabel (Tree.Svg.transform 480 100 60 60 0.5 graph1)
         )

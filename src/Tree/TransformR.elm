@@ -39,7 +39,7 @@ init halfWidth renderLabel tree =
 
         root : Node
         root =
-            { name = Tree.label tree |> renderLabel, x = 0, y = 0, r = 15, color = "red" }
+            { name = Tree.label tree |> renderLabel, x = 0, y = 0, r = 12, color = "blue" }
     in
     { dict = Dict.fromList [ ( root.name, root ) ]
     , depths = depths
@@ -128,7 +128,7 @@ xCoordinate level origin i n halfWidth =
 
 treeRoot : String -> Node
 treeRoot name =
-    { name = name, x = 0, y = 0, r = 15, color = "red" }
+    { name = name, x = 0, y = 0, r = 15, color = "blue" }
 
 
 groupToNodes : Int -> Node -> Float -> List ( String, String ) -> List Node
@@ -144,7 +144,7 @@ groupToNodes level rootNode halfWidth edges =
         endPoints =
             List.map Tuple.second edges
     in
-    List.indexedMap (\i na -> { name = na, x = xCoordinate level rootNode.x i n halfWidth, y = y, r = 15, color = "red" }) endPoints
+    List.indexedMap (\i na -> { name = na, x = xCoordinate level rootNode.x i n halfWidth, y = y, r = 12, color = "blue" }) endPoints
 
 
 groupToEdges : Int -> Node -> Float -> List ( String, String ) -> List Edge

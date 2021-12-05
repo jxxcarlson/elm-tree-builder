@@ -30,8 +30,8 @@ suite =
         , testForestNumber 2 "B'" b
         , testItem 1 "C" c
         , testForestNumber 2 "C'" c
-        , Test.skip <| testItem 2 "AA" aa
-        , Test.skip <| testForestNumber 2 "AA'" aa
+        , testItem 2 "AA" aa
+        , testForestNumber 2 "AA'" aa
         ]
 
 
@@ -89,14 +89,12 @@ c =
 
 
 aa =
-    """
-1
+    """1
   2
   3
 4
   5
-  6
-"""
+  6"""
 
 
 

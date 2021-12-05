@@ -8,7 +8,9 @@ forestTest : Int -> node -> (node -> String) -> (String -> node) -> String -> St
 forestTest quantum defaultNode renderNode makeNode str =
     let
         maybeStr2 =
-            Tree.Build.forestFromString defaultNode makeNode renderNode str |> Result.toMaybe |> Maybe.map (Render.forestToString quantum renderNode)
+            Tree.Build.forestFromString defaultNode makeNode renderNode str
+                |> Result.toMaybe
+                |> Maybe.map (Render.forestToString quantum renderNode)
     in
     if Just (String.trim str) == maybeStr2 then
         "Ok"

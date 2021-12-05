@@ -5,8 +5,8 @@ as well as some other tools:
 
 - Tree.Blocks: transform a string into a list of blocks
 
-- Tree.Build: the main module; build a tree from a string or a list  
-  of blocks.
+  - Tree.Build: the main module; build a tree from a string or a list  
+    of blocks.
 
 - Tree.Lib: preOrder, levelOrder, edges.  The latter transforms 
   Tree a to List (a, a) where the latter represents a list of 

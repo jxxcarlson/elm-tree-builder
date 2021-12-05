@@ -49,7 +49,6 @@ fuzzSuite =
         , fuzzTest 10 "10 nodes"
         , fuzzTest 20 "20 nodes"
         , fuzzTest 40 "40 nodes"
-        , fuzzTest 80 "80 nodes"
         ]
 
 

@@ -207,7 +207,7 @@ handleLT indent content state =
             Tree.tree (state.make content) []
 
         deltaLevel =
-            state.indent - indent // state.indentationQuantum
+            (state.indent - indent) // state.indentationQuantum
     in
     { state
         | blocks = List.drop 1 state.blocks
