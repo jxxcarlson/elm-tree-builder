@@ -2,7 +2,7 @@ module Tree.Transform exposing (Preferences, defaults, toGraph)
 
 {-|
 
-@docs Preferences, defaults, toGraph
+@docs Preferences, LabelStyle, defaults, toGraph
 
 -}
 
@@ -27,7 +27,7 @@ type alias Preferences =
 
 {-| Default Preferences
 -}
-defaults : { halfAngle : Float, initialEdgeLength : number, scaleFactor : Float, ballRadius : number, ballColor : String }
+defaults : Preferences
 defaults =
     { halfAngle = 0.25 * pi
     , initialEdgeLength = 2
@@ -73,7 +73,7 @@ init preferences renderLabel tree =
             { name = Tree.label tree |> renderLabel, x = 0, y = 0, r = preferences.ballRadius, color = preferences.ballColor }
 
         origin =
-            { name = "origin", x = 0, y = -preferences.initialEdgeLength, r = preferences.ballRadius, color = preferences.ballColor }
+            { name = root.name, x = 0, y = -preferences.initialEdgeLength, r = preferences.ballRadius, color = preferences.ballColor }
     in
     { edgeDict = Dict.fromList [ ( root.name, { from = origin, to = root, color = "gray" } ) ]
     , depths = depths
@@ -201,7 +201,7 @@ groupToEdges preferences rootEdge edgesAsLabelPairs =
             displaceEdge dr rootEdge
 
         endPoints =
-            List.map Tuple.second edgesAsLabelPairs
+            List.map Tuple.second edgesAsLabelPairs |> List.reverse
 
         newEdges =
             List.indexedMap (\i na -> satellite preferences i n na start) endPoints
