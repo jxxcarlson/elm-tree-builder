@@ -2,7 +2,7 @@ module Tree.Transform exposing (Preferences, defaults, toGraph)
 
 {-|
 
-@docs Preferences, LabelStyle, defaults, toGraph
+@docs Preferences, defaults, toGraph
 
 -}
 

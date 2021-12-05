@@ -5,7 +5,8 @@ as well as some other tools:
 
 - Tree.Blocks: transform a string into a list of blocks
 
-- Tree.Build: the main module 
+- Tree.Build: the main module; build a tree from a string or a list  
+  of blocks.
 
 - Tree.Lib: preOrder, levelOrder, edges.  The latter transforms 
   Tree a to List (a, a) where the latter represents a list of 
@@ -20,7 +21,7 @@ as well as some other tools:
   item.
 
 See the code in `app/src/Main.elm` for an example of building a
-tree from text and renering it to Svg.
+tree from text and rendering it to Svg.
 
 
 ## Building Trees
