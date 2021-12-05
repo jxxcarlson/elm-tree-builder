@@ -12,6 +12,7 @@ import Html exposing (Html)
 import Html.Attributes as HtmlAttr exposing (attribute)
 import Html.Events exposing (keyCode, on, onClick, onInput)
 import Json.Decode
+import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Task
@@ -28,6 +29,7 @@ type alias Model =
     , windowHeight : Int
     , windowWidth : Int
     , message : String
+    , seed : Random.Seed
     , lineNumber : Int
     , graph : Result Build.Error Tree.Graph.Graph
     , tree : Result Build.Error (Tree.Tree String)
@@ -44,7 +46,7 @@ main =
 
 
 type alias Flags =
-    { width : Int, height : Int }
+    { width : Int, height : Int, seed : Int }
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -52,6 +54,7 @@ init flags =
     ( { sourceText = initialGraphString
       , windowHeight = flags.height
       , windowWidth = flags.width
+      , seed = Random.initialSeed flags.seed |> Debug.log "SEED2"
       , message = ""
       , lineNumber = 0
       , graph = Result.map (Tree.Transform.toGraph preferences identity) (Build.fromString "?" identity initialGraphString)
@@ -69,6 +72,7 @@ type Msg
     | TreeSelected File
     | TreeLoaded String
     | SaveToFile
+    | RandomTree
 
 
 subscriptions model =
@@ -122,6 +126,9 @@ update msg model =
 
         SaveToFile ->
             ( model, download model.sourceText )
+
+        RandomTree ->
+            ( model, Cmd.none )
 
 
 download : String -> Cmd msg
@@ -285,7 +292,7 @@ mainColumn model =
     column (mainColumnStyle model)
         [ column [ centerY, paddingEach { top = 16, bottom = 0, left = 0, right = 0 }, Element.spacing 8, Element.width (px appWidth_), Element.height (px (appHeight_ model)) ]
             [ title "Tree Test App"
-            , row [ Element.spacing 12 ] [ openFileButton, saveToFileButton ]
+            , row [ Element.spacing 12 ] [ openFileButton, saveToFileButton, randomTreeButton ]
             , column [ Element.height (panelHeight model), Element.spacing 12 ]
                 [ row [] [ editor model, rhs model ]
                 ]
@@ -324,6 +331,14 @@ buttonColor buttonMode currentMode =
 
     else
         Element.rgb255 60 60 60
+
+
+randomTreeButton : Element Msg
+randomTreeButton =
+    Element.Input.button buttonStyle
+        { onPress = Just RandomTree
+        , label = el [ centerX, centerY, Font.size 14 ] (Element.text "Random Tree")
+        }
 
 
 openFileButton : Element Msg
