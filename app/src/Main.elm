@@ -4,19 +4,23 @@ import Browser
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
+import Element.Input
+import File exposing (File)
+import File.Download as Download
+import File.Select as Select
 import Html exposing (Html)
 import Html.Attributes as HtmlAttr exposing (attribute)
 import Html.Events exposing (keyCode, on, onClick, onInput)
 import Json.Decode
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Task
 import Tree
 import Tree.Build as Build
 import Tree.Extra
 import Tree.Graph
 import Tree.Svg
 import Tree.Transform exposing (defaults)
-import Tree.TransformR as TR
 
 
 type alias Model =
@@ -61,6 +65,10 @@ type Msg
     = NoOp
     | InputText String
     | ClearText
+    | TreeRequested
+    | TreeSelected File
+    | TreeLoaded String
+    | SaveToFile
 
 
 subscriptions model =
@@ -93,34 +101,32 @@ update msg model =
             , Cmd.none
             )
 
+        TreeRequested ->
+            ( model
+            , Select.file [ "text/plain" ] TreeSelected
+            )
 
-tree1 : Result Build.Error (Tree.Tree String)
-tree1 =
-    Build.fromString "?" identity forestData
+        TreeSelected file ->
+            ( model
+            , Task.perform TreeLoaded (File.toString file)
+            )
+
+        TreeLoaded content ->
+            ( { model
+                | sourceText = content
+                , graph = Result.map (Tree.Transform.toGraph preferences identity) (Build.fromString "?" identity content)
+                , tree = Build.fromString "?" identity content
+              }
+            , Cmd.none
+            )
+
+        SaveToFile ->
+            ( model, download model.sourceText )
 
 
-forestData =
-    """
-*
-  1
-    2
-    3
-  4
-    5
-    6
-"""
-
-
-forestData1 =
-    """
-*
- 1
-  2
-  3
- 4
-  5
-  6
-"""
+download : String -> Cmd msg
+download treeData =
+    Download.string "tree.txt" "text/plain" treeData
 
 
 initialGraphString =
@@ -133,50 +139,6 @@ initialGraphString =
   6
  7
 """
-
-
-str2 =
-    """
-1
- 2
-  3
-   4
-   5
-  6
- 7
-  8
-   9
-   10
-   11
-"""
-
-
-outline =
-    """
-1 Home
-  2 Important things (according to Cicero)
-    3 Library
-    4 Garden
-      5 Pond
-      6 Grasses
-      7 Flowers
-"""
-
-
-tree2 =
-    Build.fromString "?" identity "1\n 2\n  3\n  4\n"
-
-
-
---\n 3\n  6\n   10\n   11"
-
-
-graph =
-    Result.map (Tree.Transform.toGraph preferences identity) tree1 |> Result.withDefault []
-
-
-graph1 =
-    Result.map (TR.toGraph 3 identity) tree1 |> Result.withDefault []
 
 
 preferences =
@@ -278,10 +240,6 @@ editor_ model =
 -- PARAMETERS
 
 
-widePanelWidth_ =
-    2 * panelWidth_
-
-
 panelWidth_ =
     560
 
@@ -327,6 +285,7 @@ mainColumn model =
     column (mainColumnStyle model)
         [ column [ centerY, paddingEach { top = 16, bottom = 0, left = 0, right = 0 }, Element.spacing 8, Element.width (px appWidth_), Element.height (px (appHeight_ model)) ]
             [ title "Tree Test App"
+            , row [ Element.spacing 12 ] [ openFileButton, saveToFileButton ]
             , column [ Element.height (panelHeight model), Element.spacing 12 ]
                 [ row [] [ editor model, rhs model ]
                 ]
@@ -352,15 +311,51 @@ title str =
 
 
 
+-- BUTTONS
+
+
+defaultButtonColor =
+    Element.rgb255 60 60 60
+
+
+buttonColor buttonMode currentMode =
+    if buttonMode == currentMode then
+        Element.rgb255 130 12 9
+
+    else
+        Element.rgb255 60 60 60
+
+
+openFileButton : Element Msg
+openFileButton =
+    Element.Input.button buttonStyle
+        { onPress = Just TreeRequested
+        , label = el [ centerX, centerY, Font.size 14 ] (Element.text "Open File")
+        }
+
+
+saveToFileButton : Element Msg
+saveToFileButton =
+    Element.Input.button buttonStyle
+        { onPress = Just SaveToFile
+        , label = el [ centerX, centerY, Font.size 14 ] (Element.text "Save to File")
+        }
+
+
+buttonStyle =
+    [ Font.color (rgb255 255 255 255)
+    , Background.color (rgb255 0 0 160)
+    , paddingXY 15 8
+    , mouseDown [ Background.color (rgb255 180 180 255) ]
+    ]
+
+
+
 -- STYLE
 
 
 grayColor g =
     Element.rgb g g g
-
-
-whiteColor =
-    grayColor 1
 
 
 fontGray g =

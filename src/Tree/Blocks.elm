@@ -110,6 +110,7 @@ fromStringAsLines str =
         |> String.lines
         |> List.filter (\line -> String.left 1 line /= "#")
         |> List.map (\line -> Line.classify line)
+        |> Debug.log "BLOCKS"
 
 
 {-| -}

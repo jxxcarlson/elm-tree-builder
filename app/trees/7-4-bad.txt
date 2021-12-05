@@ -1,0 +1,9 @@
+# renders incorrectly:
+# topology OK, but labels are wrong
+1
+ 2
+  a
+   b
+ 3
+  c
+ 4
