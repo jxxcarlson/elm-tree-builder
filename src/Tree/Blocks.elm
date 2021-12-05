@@ -108,13 +108,14 @@ fromStringAsLines str =
     str
         |> String.trim
         |> String.lines
+        |> List.filter (\line -> String.left 1 line /= "#")
         |> List.map (\line -> Line.classify line)
 
 
 {-| -}
 fromStringAsParagraphs : String -> List Block
 fromStringAsParagraphs str =
-    str |> String.lines |> make
+    str |> String.lines |> List.filter (\line -> String.left 1 line /= "#") |> make
 
 
 {-| -}

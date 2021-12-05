@@ -24,9 +24,20 @@ forestTest quantum defaultNode renderNode makeNode str =
                 String.trim str ++ " ≠ " ++ str2
 
 
+removeComments : String -> String
+removeComments str =
+    str
+        |> String.lines
+        |> List.filter (\line -> String.left 1 line /= "#")
+        |> String.join "\n"
+
+
 test : Int -> node -> (node -> String) -> (String -> node) -> String -> String
-test quantum defaultNode renderNode makeNode str =
+test quantum defaultNode renderNode makeNode str_ =
     let
+        str =
+            removeComments str_
+
         maybeStr2 =
             Tree.Build.fromString defaultNode makeNode str |> Result.toMaybe |> Maybe.map (Render.toString quantum renderNode)
     in
