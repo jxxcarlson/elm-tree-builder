@@ -12,6 +12,7 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tree
 import Tree.Build as Build
+import Tree.Extra
 import Tree.Graph
 import Tree.Svg
 import Tree.Transform exposing (defaults)
@@ -324,14 +325,30 @@ noFocus =
 mainColumn : Model -> Element Msg
 mainColumn model =
     column (mainColumnStyle model)
-        [ column [ centerY, paddingEach { top = 46, bottom = 0, left = 0, right = 0 }, Element.spacing 8, Element.width (px appWidth_), Element.height (px (appHeight_ model)) ]
-            [ -- title "L3 Demo App"
-              column [ Element.height (panelHeight model), Element.spacing 12 ]
+        [ column [ centerY, paddingEach { top = 16, bottom = 0, left = 0, right = 0 }, Element.spacing 8, Element.width (px appWidth_), Element.height (px (appHeight_ model)) ]
+            [ title "Tree Test App"
+            , column [ Element.height (panelHeight model), Element.spacing 12 ]
                 [ row [] [ editor model, rhs model ]
                 ]
-            , row [ Element.paddingXY 8 0, Element.height (px 30), Element.width Element.fill, Font.size 14, Background.color (Element.rgb 0.3 0.3 0.3), Font.color (Element.rgb 1 1 1) ] [ Element.text model.message ]
+            , row
+                [ Element.paddingXY 12 0
+                , Element.height (px 30)
+                , Element.width Element.fill
+                , Font.size 14
+                , Background.color (Element.rgb 0.3 0.3 0.3)
+                , Font.color (Element.rgb 1 1 1)
+                , Element.spacing 12
+                ]
+                [ Element.text ("Nodes = " ++ (Result.map (Tree.Extra.nodeCount >> String.fromInt) model.tree |> Result.withDefault "?"))
+                , Element.text ("Depth = " ++ (Result.map (Tree.Extra.depth >> String.fromInt) model.tree |> Result.withDefault "?"))
+                ]
             ]
         ]
+
+
+title : String -> Element msg
+title str =
+    row [ centerX, fontGray 0.9 ] [ Element.text str ]
 
 
 
