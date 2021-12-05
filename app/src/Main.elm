@@ -1,20 +1,16 @@
 module Main exposing (main)
 
 import Browser
-import Browser.Dom as Dom
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
-import Element.Input as Input
-import File.Download as Download
 import Html exposing (Html)
 import Html.Attributes as HtmlAttr exposing (attribute)
 import Html.Events exposing (keyCode, on, onClick, onInput)
 import Json.Decode
-import Process
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Task exposing (Task)
+import Tree
 import Tree.Build as Build
 import Tree.Graph
 import Tree.Svg
@@ -28,7 +24,8 @@ type alias Model =
     , windowWidth : Int
     , message : String
     , lineNumber : Int
-    , graph : Maybe Tree.Graph.Graph
+    , graph : Result Build.Error Tree.Graph.Graph
+    , tree : Result Build.Error (Tree.Tree String)
     }
 
 
@@ -47,12 +44,13 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( { sourceText = ""
+    ( { sourceText = initialGraphString
       , windowHeight = flags.height
       , windowWidth = flags.width
       , message = ""
       , lineNumber = 0
-      , graph = Nothing
+      , graph = Result.map (Tree.Transform.toGraph preferences identity) (Build.fromString "?" identity initialGraphString)
+      , tree = Build.fromString "?" identity initialGraphString
       }
     , Cmd.none
     )
@@ -75,8 +73,14 @@ update msg model =
             ( model, Cmd.none )
 
         InputText t ->
+            let
+                tree_ =
+                    Build.fromString "?" identity t
+            in
             ( { model
                 | sourceText = t
+                , tree = tree_
+                , graph = Result.map (Tree.Transform.toGraph preferences identity) tree_
               }
             , Cmd.none
             )
@@ -89,6 +93,7 @@ update msg model =
             )
 
 
+tree1 : Result Build.Error (Tree.Tree String)
 tree1 =
     Build.fromString "?" identity forestData
 
@@ -117,7 +122,7 @@ forestData1 =
 """
 
 
-str =
+initialGraphString =
     """
 1
  2
@@ -177,25 +182,30 @@ preferences =
     { defaults | ballRadius = 10, halfAngle = 0.1 * pi, scaleFactor = 0.85 }
 
 
-render : Tree.Graph.Graph -> Html msg
-render graph_ =
+render : Model -> Tree.Graph.Graph -> Html msg
+render model graph_ =
+    let
+        h =
+            String.fromInt <| rawPanelHeight model - 24
+    in
     svg
         [ Svg.Attributes.width "900"
         , Svg.Attributes.height "900"
-        , Svg.Attributes.viewBox "0 0 1000 1000"
+        , Svg.Attributes.viewBox ("0 0 " ++ String.fromInt panelWidth_ ++ h)
+        , Svg.Attributes.fill "white"
         ]
         ([ rect
             [ Svg.Attributes.x "10"
             , Svg.Attributes.y "10"
-            , Svg.Attributes.width "100"
-            , Svg.Attributes.height "100"
+            , Svg.Attributes.width (String.fromInt panelWidth_)
+            , Svg.Attributes.height h
             , Svg.Attributes.rx "15"
             , Svg.Attributes.ry "15"
             , Svg.Attributes.fill "white"
             ]
             []
          ]
-            ++ Tree.Svg.render Tree.Svg.FullLabel (Tree.Svg.transform 480 100 60 60 0.5 graph_)
+            ++ Tree.Svg.render Tree.Svg.FullLabel (Tree.Svg.transform 280 100 60 60 0.5 graph_)
         )
 
 
@@ -219,17 +229,17 @@ rhs model =
     let
         toRender =
             case model.graph of
-                Nothing ->
-                    [ Element.text "No valid graph" ]
+                Ok g ->
+                    [ render model g |> Element.html ]
 
-                Just g ->
-                    [ render g |> Element.html ]
+                Err error ->
+                    [ Element.text "No valid graph" ]
     in
     column [ Element.spacing 8 ]
         [ row
             [ fontGray 0.9
             , Element.spacing 12
-            , moveUp 9
+            , moveDown 20
             , Font.size 14
             ]
             toRender
@@ -279,8 +289,12 @@ appHeight_ model =
     model.windowHeight - 140
 
 
+rawPanelHeight model =
+    appHeight_ model - 160
+
+
 panelHeight model =
-    px (appHeight_ model - 160)
+    px (rawPanelHeight model)
 
 
 innerPanelHeight model =
@@ -313,7 +327,7 @@ mainColumn model =
         [ column [ centerY, paddingEach { top = 46, bottom = 0, left = 0, right = 0 }, Element.spacing 8, Element.width (px appWidth_), Element.height (px (appHeight_ model)) ]
             [ -- title "L3 Demo App"
               column [ Element.height (panelHeight model), Element.spacing 12 ]
-                [ row [ Element.spacing 12 ] [ editor model, rhs model ]
+                [ row [] [ editor model, rhs model ]
                 ]
             , row [ Element.paddingXY 8 0, Element.height (px 30), Element.width Element.fill, Font.size 14, Background.color (Element.rgb 0.3 0.3 0.3), Font.color (Element.rgb 1 1 1) ] [ Element.text model.message ]
             ]

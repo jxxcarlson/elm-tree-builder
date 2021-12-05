@@ -39,6 +39,7 @@ suite =
         , testItem "B" b
         , testItem "C" c
         , testItem "D" d
+        , testItem "E" e
         ]
 
 
@@ -90,4 +91,22 @@ d =
   8
   9
   10
+"""
+
+
+e =
+    """
+1
+ 2
+  5
+   p
+   q
+  6
+ 3
+ 4
+  7
+   r
+   s
+   t
+  8
 """
