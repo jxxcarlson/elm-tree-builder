@@ -57,7 +57,7 @@ type alias Flags =
 
 
 initialAperture =
-    0.25
+    0.225
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -178,6 +178,10 @@ initialGraphString =
    5
   6
  7
+ 8
+  9
+  10
+  11
 """
 
 
@@ -189,27 +193,36 @@ render : Model -> Tree.Graph.Graph -> Html msg
 render model graph_ =
     let
         h =
-            String.fromInt <| rawPanelHeight model - 14
+            String.fromInt <| rawPanelHeight model - 7
+
+        w =
+            String.fromInt <| panelWidth_ + round (0.52 * toFloat panelWidth_)
     in
     svg
-        [ Svg.Attributes.width "900"
-        , Svg.Attributes.height "920"
-        , Svg.Attributes.viewBox ("0 0 " ++ String.fromInt panelWidth_ ++ h)
+        [ Svg.Attributes.width w
+        , Svg.Attributes.height h
+
+        --, Svg.Attributes.viewBox ("0 0 " ++ w ++ " " ++ h)
+        , Svg.Attributes.viewBox "0 0 100% 100%"
         , Svg.Attributes.fill "white"
         ]
         ([ rect
             [ Svg.Attributes.x "10"
             , Svg.Attributes.y "10"
-            , Svg.Attributes.width (String.fromInt panelWidth_)
+            , Svg.Attributes.width w
             , Svg.Attributes.height h
-            , Svg.Attributes.rx "15"
-            , Svg.Attributes.ry "15"
+            , Svg.Attributes.rx "0"
+            , Svg.Attributes.ry "0"
             , Svg.Attributes.fill "white"
             ]
             []
          ]
-            ++ Tree.Svg.render model.labelStyle (Tree.Svg.transform 280 100 60 60 0.5 graph_)
+            ++ Tree.Svg.render model.labelStyle (Tree.Svg.transform 425 100 60 60 0.5 graph_)
         )
+
+
+
+-- https://package.elm-lang.org/packages/jxxcarlson/elm-tree-builder/latest/
 
 
 view : Model -> Html Msg
@@ -221,9 +234,9 @@ mainColumnStyle model =
     [ centerX
     , centerY
     , bgGray 0.5
-    , paddingXY 20 20
+    , paddingXY 20 10
     , Element.width (px (appWidth_ + 40))
-    , Element.height (px (appHeight_ model + 40))
+    , Element.height (px (appHeight_ model))
     ]
 
 
@@ -242,7 +255,6 @@ rhs model =
         [ row
             [ fontGray 0.9
             , Element.spacing 12
-            , moveDown 14
             , Font.size 14
             ]
             toRender
@@ -270,7 +282,7 @@ editor_ model =
                 , HtmlAttr.attribute "navigateWithinSoftTabs" "true"
                 , HtmlAttr.attribute "fontsize" "12"
                 , HtmlAttr.style "height" (String.fromInt (innerPanelHeight model) ++ "px")
-                , HtmlAttr.style "width" (String.fromInt panelWidth_ ++ "px")
+                , HtmlAttr.style "width" (String.fromInt (panelWidth_ // 2) ++ "px")
                 , HtmlAttr.attribute "text" model.sourceText
                 ]
                 []
@@ -285,7 +297,7 @@ panelWidth_ =
 
 
 appHeight_ model =
-    model.windowHeight - 140
+    model.windowHeight - 160
 
 
 rawPanelHeight model =
@@ -305,7 +317,7 @@ appWidth_ =
 
 
 editor model =
-    column [ Element.height (px (innerPanelHeight model)), moveDown 18, alignTop ]
+    column [ Element.height (px (innerPanelHeight model)), moveDown 4, alignTop ]
         [ row [ Element.spacing 12 ]
             []
         , editor_ model
@@ -320,11 +332,25 @@ noFocus =
     }
 
 
+linkToPackage =
+    Element.newTabLink [ Font.color (Element.rgb 0.8 0.8 0.8), Font.size 14 ]
+        { url = "https://package.elm-lang.org/packages/jxxcarlson/elm-tree-builder/latest/"
+        , label = Element.text "package: jxxcarlson/elm-tree-builder"
+        }
+
+
+linkToGitHub =
+    Element.newTabLink [ Font.color (Element.rgb 0.8 0.8 0.8), Font.size 14 ]
+        { url = "https://github.com/jxxcarlson/elm-tree-builder"
+        , label = Element.text "GitHub repo"
+        }
+
+
 mainColumn : Model -> Element Msg
 mainColumn model =
     column (mainColumnStyle model)
-        [ column [ centerY, paddingEach { top = 16, bottom = 0, left = 0, right = 0 }, Element.spacing 8, Element.width (px appWidth_), Element.height (px (appHeight_ model)) ]
-            [ title "Tree Test App"
+        [ column [ centerY, paddingEach { top = 16, bottom = 0, left = 0, right = 0 }, Element.spacing 12, Element.width (px appWidth_), Element.height (px (appHeight_ model)) ]
+            [ row [ Element.spacing 24 ] [ title "Tree Test App", Element.el [ centerX ] linkToPackage, linkToGitHub ]
             , row [ Element.spacing 12, Element.width (px appWidth_) ]
                 [ openFileButton
                 , saveToFileButton
