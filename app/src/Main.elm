@@ -21,8 +21,8 @@ import Tree.Build as Build
 import Tree.Extra
 import Tree.Graph
 import Tree.Random
+import Tree.Render exposing (defaults)
 import Tree.Svg
-import Tree.Transform exposing (defaults)
 
 
 type alias Model =
@@ -68,7 +68,7 @@ init flags =
       , seed = Random.initialSeed flags.seed |> Debug.log "SEED2"
       , message = ""
       , lineNumber = 0
-      , graph = Result.map (Tree.Transform.toGraph (preferences initialAperture) identity) (Build.fromString "?" identity initialGraphString)
+      , graph = Result.map (Tree.Render.toGraph (preferences initialAperture) identity) (Build.fromString "?" identity initialGraphString)
       , tree = Build.fromString "?" identity initialGraphString
       , labelStyle = Tree.Svg.NoLabel
       , aperture = initialAperture
@@ -107,7 +107,7 @@ update msg model =
             ( { model
                 | sourceText = t
                 , tree = tree_
-                , graph = Result.map (Tree.Transform.toGraph (preferences model.aperture) identity) tree_
+                , graph = Result.map (Tree.Render.toGraph (preferences model.aperture) identity) tree_
               }
             , Cmd.none
             )
@@ -132,7 +132,7 @@ update msg model =
         TreeLoaded content ->
             ( { model
                 | sourceText = content
-                , graph = Result.map (Tree.Transform.toGraph (preferences model.aperture) identity) (Build.fromString "?" identity content)
+                , graph = Result.map (Tree.Render.toGraph (preferences model.aperture) identity) (Build.fromString "?" identity content)
                 , tree = Build.fromString "?" identity content
               }
             , Cmd.none
@@ -156,7 +156,7 @@ update msg model =
                     Build.fromString "?" identity sourceText
 
                 graph =
-                    Result.map (Tree.Transform.toGraph (preferences model.aperture) identity) tree
+                    Result.map (Tree.Render.toGraph (preferences model.aperture) identity) tree
             in
             ( { model | sourceText = sourceText, tree = tree, graph = graph, seed = seed }, Cmd.none )
 

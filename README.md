@@ -9,16 +9,19 @@ as well as some other tools:
     of blocks.
 
 - Tree.Lib: preOrder, levelOrder, edges.  The latter transforms 
-  Tree a to List (a, a) where the latter represents a list of 
+  Tree a to List (a, a) where the List (a, a) represents a list of 
   edges of the tree
 
 - Tree.Random: generate random trees
 
+- Tree.Render: render trees to strings or graphs.  A graph
+  is a data structure which represents graphical image of a tree.
+  It is used to render trees to Svg.
+
 - Tree.Svg: helper functions for rendering graphs (a data
   structure derived from a tree that can be rendered to SVG).
 
-- Tree.Transform: transform a Tree to a Graph, as in the preceding
-  item.
+
 
 See the code in `app/src/Main.elm` for an example of building a
 tree from text and rendering it to Svg.
