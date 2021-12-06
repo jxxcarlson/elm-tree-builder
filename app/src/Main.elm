@@ -35,6 +35,7 @@ type alias Model =
     , graph : Result Build.Error Tree.Graph.Graph
     , tree : Result Build.Error (Tree.Tree String)
     , labelStyle : Tree.Svg.LabelStyle
+    , aperture : Float
     }
 
 
@@ -51,6 +52,14 @@ type alias Flags =
     { width : Int, height : Int, seed : Int }
 
 
+
+-- Parameters
+
+
+initialAperture =
+    0.25
+
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { sourceText = initialGraphString
@@ -59,9 +68,10 @@ init flags =
       , seed = Random.initialSeed flags.seed |> Debug.log "SEED2"
       , message = ""
       , lineNumber = 0
-      , graph = Result.map (Tree.Transform.toGraph preferences identity) (Build.fromString "?" identity initialGraphString)
+      , graph = Result.map (Tree.Transform.toGraph (preferences initialAperture) identity) (Build.fromString "?" identity initialGraphString)
       , tree = Build.fromString "?" identity initialGraphString
       , labelStyle = Tree.Svg.NoLabel
+      , aperture = initialAperture
       }
     , Cmd.none
     )
@@ -76,6 +86,7 @@ type Msg
     | TreeLoaded String
     | SaveToFile
     | RandomTree
+    | SetLabelStyle Tree.Svg.LabelStyle
 
 
 subscriptions model =
@@ -96,7 +107,7 @@ update msg model =
             ( { model
                 | sourceText = t
                 , tree = tree_
-                , graph = Result.map (Tree.Transform.toGraph preferences identity) tree_
+                , graph = Result.map (Tree.Transform.toGraph (preferences model.aperture) identity) tree_
               }
             , Cmd.none
             )
@@ -121,7 +132,7 @@ update msg model =
         TreeLoaded content ->
             ( { model
                 | sourceText = content
-                , graph = Result.map (Tree.Transform.toGraph preferences identity) (Build.fromString "?" identity content)
+                , graph = Result.map (Tree.Transform.toGraph (preferences model.aperture) identity) (Build.fromString "?" identity content)
                 , tree = Build.fromString "?" identity content
               }
             , Cmd.none
@@ -133,7 +144,7 @@ update msg model =
         RandomTree ->
             let
                 ( numberOfNodes, seed_ ) =
-                    Random.step (Random.int 3 30) model.seed
+                    Random.step (Random.int 3 40) model.seed
 
                 ( randomNumber, seed ) =
                     Random.step (Random.int 0 numberOfNodes) seed_
@@ -145,9 +156,12 @@ update msg model =
                     Build.fromString "?" identity sourceText
 
                 graph =
-                    Result.map (Tree.Transform.toGraph preferences identity) tree
+                    Result.map (Tree.Transform.toGraph (preferences model.aperture) identity) tree
             in
             ( { model | sourceText = sourceText, tree = tree, graph = graph, seed = seed }, Cmd.none )
+
+        SetLabelStyle labelStyle ->
+            ( { model | labelStyle = labelStyle }, Cmd.none )
 
 
 download : String -> Cmd msg
@@ -167,8 +181,8 @@ initialGraphString =
 """
 
 
-preferences =
-    { defaults | ballRadius = 10, halfAngle = 0.25 * pi, scaleFactor = 0.8 }
+preferences aperture =
+    { defaults | ballRadius = 10, halfAngle = aperture * pi, scaleFactor = 0.8 }
 
 
 render : Model -> Tree.Graph.Graph -> Html msg
@@ -311,7 +325,16 @@ mainColumn model =
     column (mainColumnStyle model)
         [ column [ centerY, paddingEach { top = 16, bottom = 0, left = 0, right = 0 }, Element.spacing 8, Element.width (px appWidth_), Element.height (px (appHeight_ model)) ]
             [ title "Tree Test App"
-            , row [ Element.spacing 12 ] [ openFileButton, saveToFileButton, randomTreeButton ]
+            , row [ Element.spacing 12, Element.width (px appWidth_) ]
+                [ openFileButton
+                , saveToFileButton
+                , randomTreeButton
+                , row [ Element.spacing 6, alignRight ]
+                    [ labelStyleButton Tree.Svg.NoLabel
+                    , labelStyleButton Tree.Svg.FullLabel
+                    , labelStyleButton Tree.Svg.FirstWord
+                    ]
+                ]
             , column [ Element.height (panelHeight model), Element.spacing 12 ]
                 [ row [] [ editor model, rhs model ]
                 ]
@@ -342,6 +365,26 @@ title str =
 
 defaultButtonColor =
     Element.rgb255 60 60 60
+
+
+labelStyleButton labelStyle =
+    Element.Input.button buttonStyle
+        { onPress = Just (SetLabelStyle labelStyle)
+        , label = el [ centerX, centerY, Font.size 14 ] (Element.text (labelStyleToString labelStyle))
+        }
+
+
+labelStyleToString : Tree.Svg.LabelStyle -> String
+labelStyleToString labelStyle =
+    case labelStyle of
+        Tree.Svg.NoLabel ->
+            "No Label"
+
+        Tree.Svg.FullLabel ->
+            "Full Label"
+
+        Tree.Svg.FirstWord ->
+            "First Word"
 
 
 buttonColor buttonMode currentMode =
@@ -378,7 +421,7 @@ saveToFileButton =
 
 buttonStyle =
     [ Font.color (rgb255 255 255 255)
-    , Background.color (rgb255 0 0 160)
+    , Background.color (rgb255 60 60 60)
     , paddingXY 15 8
     , mouseDown [ Background.color (rgb255 180 180 255) ]
     ]
