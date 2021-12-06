@@ -3,3 +3,8 @@ scripts:
   make: elm make src/Main.elm --output=Main.js
 
   loc: cloc src/Main.elm
+
+  publish:
+    - cp -r public/ /Users/jxxcarlson/dev/bluesky/jxxcarlson.github.io/app/treebuilder/public
+    - cp Main.js /Users/jxxcarlson/dev/bluesky/jxxcarlson.github.io/app/treebuilder
+    - cp index.html /Users/jxxcarlson/dev/bluesky/jxxcarlson.github.io/app/treebuilder

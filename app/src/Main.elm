@@ -189,11 +189,11 @@ render : Model -> Tree.Graph.Graph -> Html msg
 render model graph_ =
     let
         h =
-            String.fromInt <| rawPanelHeight model - 24
+            String.fromInt <| rawPanelHeight model - 14
     in
     svg
         [ Svg.Attributes.width "900"
-        , Svg.Attributes.height "900"
+        , Svg.Attributes.height "920"
         , Svg.Attributes.viewBox ("0 0 " ++ String.fromInt panelWidth_ ++ h)
         , Svg.Attributes.fill "white"
         ]
@@ -242,7 +242,7 @@ rhs model =
         [ row
             [ fontGray 0.9
             , Element.spacing 12
-            , moveDown 20
+            , moveDown 14
             , Font.size 14
             ]
             toRender
@@ -305,7 +305,7 @@ appWidth_ =
 
 
 editor model =
-    column [ Element.height (px (innerPanelHeight model)), moveUp 28 ]
+    column [ Element.height (px (innerPanelHeight model)), moveDown 18, alignTop ]
         [ row [ Element.spacing 12 ]
             []
         , editor_ model
