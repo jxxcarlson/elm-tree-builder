@@ -62,7 +62,7 @@ init preferences renderLabel tree =
 
         edges : List ( String, String )
         edges =
-            Lib.edges tree |> List.map (\( a, b ) -> ( renderLabel a, renderLabel b ))
+            Lib.edges tree |> List.map (\( a, b ) -> ( renderLabel a, renderLabel b )) |> Debug.log "EDGES"
 
         edgeGroups : List ( ( String, String ), List ( String, String ) )
         edgeGroups =
@@ -106,6 +106,9 @@ nextStep state =
 
                         newDict =
                             List.foldl (\e runningDict -> Dict.insert e.to.name e runningDict) state.edgeDict newEdges
+
+                        info =
+                            newDict |> Dict.toList |> List.map (\( name, e ) -> ( name, e.from.name, e.to.name )) |> Debug.log "DICT SUMMARY"
                     in
                     Loop
                         { state

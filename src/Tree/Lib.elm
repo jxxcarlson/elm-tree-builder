@@ -37,22 +37,41 @@ levelOrder tree =
 -}
 edges : Tree a -> List ( a, a )
 edges tree =
+    edgesAux { trees = [ tree ], edges = [] } |> .edges |> List.reverse |> Debug.log "EDGES (*)"
+
+
+type alias EdgeState a =
+    { trees : List (Tree a), edges : List ( a, a ) }
+
+
+edgesAux : EdgeState a -> EdgeState a
+edgesAux state =
     let
-        f a t_ =
-            ( a, List.length (Tree.children t_) )
-
-        t1 : List ( a, Int )
-        t1 =
-            (\tt -> preorderF f tt) tree
-
-        l1 : List a
-        l1 =
-            repeatF t1
-
-        l2 =
-            levelOrder tree
+        _ =
+            Debug.log "STATE" state
     in
-    List.map2 (\a b -> ( a, b )) l1 (List.drop 1 l2)
+    case List.head state.trees of
+        Nothing ->
+            state
+
+        Just tree ->
+            let
+                children =
+                    Tree.children tree
+
+                tos =
+                    List.map Tree.label children
+
+                from =
+                    Tree.label tree
+
+                newEdges =
+                    List.map (\to -> ( from, to )) tos |> List.reverse
+            in
+            edgesAux
+                { trees = children ++ List.drop 1 state.trees
+                , edges = newEdges ++ state.edges
+                }
 
 
 
