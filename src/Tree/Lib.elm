@@ -37,7 +37,7 @@ levelOrder tree =
 -}
 edges : Tree a -> List ( a, a )
 edges tree =
-    edgesAux { trees = [ tree ], edges = [] } |> .edges |> List.reverse |> Debug.log "EDGES (*)"
+    edgesAux { trees = [ tree ], edges = [] } |> .edges |> List.reverse
 
 
 type alias EdgeState a =
@@ -46,10 +46,6 @@ type alias EdgeState a =
 
 edgesAux : EdgeState a -> EdgeState a
 edgesAux state =
-    let
-        _ =
-            Debug.log "STATE" state
-    in
     case List.head state.trees of
         Nothing ->
             state
