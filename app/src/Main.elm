@@ -20,6 +20,7 @@ import Tree
 import Tree.Build as Build
 import Tree.Extra
 import Tree.Graph
+import Tree.Random
 import Tree.Svg
 import Tree.Transform exposing (defaults)
 
@@ -33,6 +34,7 @@ type alias Model =
     , lineNumber : Int
     , graph : Result Build.Error Tree.Graph.Graph
     , tree : Result Build.Error (Tree.Tree String)
+    , labelStyle : Tree.Svg.LabelStyle
     }
 
 
@@ -59,6 +61,7 @@ init flags =
       , lineNumber = 0
       , graph = Result.map (Tree.Transform.toGraph preferences identity) (Build.fromString "?" identity initialGraphString)
       , tree = Build.fromString "?" identity initialGraphString
+      , labelStyle = Tree.Svg.NoLabel
       }
     , Cmd.none
     )
@@ -128,7 +131,23 @@ update msg model =
             ( model, download model.sourceText )
 
         RandomTree ->
-            ( model, Cmd.none )
+            let
+                ( numberOfNodes, seed_ ) =
+                    Random.step (Random.int 3 30) model.seed
+
+                ( randomNumber, seed ) =
+                    Random.step (Random.int 0 numberOfNodes) seed_
+
+                sourceText =
+                    Tree.Random.generateOutline numberOfNodes randomNumber
+
+                tree =
+                    Build.fromString "?" identity sourceText
+
+                graph =
+                    Result.map (Tree.Transform.toGraph preferences identity) tree
+            in
+            ( { model | sourceText = sourceText, tree = tree, graph = graph, seed = seed }, Cmd.none )
 
 
 download : String -> Cmd msg
@@ -149,7 +168,7 @@ initialGraphString =
 
 
 preferences =
-    { defaults | ballRadius = 10, halfAngle = 0.1 * pi, scaleFactor = 0.85 }
+    { defaults | ballRadius = 10, halfAngle = 0.25 * pi, scaleFactor = 0.8 }
 
 
 render : Model -> Tree.Graph.Graph -> Html msg
@@ -175,7 +194,7 @@ render model graph_ =
             ]
             []
          ]
-            ++ Tree.Svg.render Tree.Svg.FullLabel (Tree.Svg.transform 280 100 60 60 0.5 graph_)
+            ++ Tree.Svg.render model.labelStyle (Tree.Svg.transform 280 100 60 60 0.5 graph_)
         )
 
 

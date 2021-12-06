@@ -79,7 +79,7 @@ rng : Random.Seed -> ( Move, Random.Seed )
 rng seed =
     let
         ( move, s1 ) =
-            Random.step (Random.weighted ( 40, Forward ) [ ( 25, Stay ), ( 40, Forward ), ( 25, Back ), ( 10, BackTwice ) ]) seed
+            Random.step (Random.weighted ( 20, Forward ) [ ( 45, Stay ), ( 20, Forward ), ( 25, Back ), ( 10, BackTwice ) ]) seed
     in
     ( move, s1 )
 
