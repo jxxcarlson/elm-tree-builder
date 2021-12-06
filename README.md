@@ -18,13 +18,14 @@ as well as some other tools:
   is a data structure which represents graphical image of a tree.
   It is used to render trees to Svg.
 
-- Tree.Svg: helper functions for rendering graphs (a data
-  structure derived from a tree that can be rendered to SVG).
+- Tree.Svg: helper functions for rendering graphs.
 
 
 
 See the code in `app/src/Main.elm` for an example of building a
-tree from text and rendering it to Svg.
+tree from text and rendering it to Svg.  You can also use this
+app to generate random trees.  Trees can be read from a text
+file and saved to a text file.
 
 
 ## Building Trees
