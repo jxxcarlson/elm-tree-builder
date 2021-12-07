@@ -1,4 +1,7 @@
-module Tree.Build exposing (fromString, fromBlocks, forestFromString, forestFromBlocks, Error(..))
+module Tree.Build exposing
+    ( fromString, fromBlocks, forestFromString, forestFromBlocks, Error(..)
+    , popUntil
+    )
 
 {-| This module provides tools for building
 a tree from a string or a list of blocks. As noted
@@ -64,11 +67,12 @@ init defaultNode makeNode blocks =
 
         Just rootBlock ->
             Ok
-                { blocks = List.drop 1 blocks
+                { blocks = List.drop 1 (blocks |> Debug.log "BLOCKS")
                 , zipper = Zipper.fromTree <| Tree.tree (makeNode rootBlock) []
                 , indentationQuantum = ProvisionalQuantum 1
                 , indent = 0
                 , level = 0
+                , indentationChanges = []
                 , make = makeNode
                 , default = Zipper.fromTree (Tree.tree defaultNode [])
                 }
@@ -79,6 +83,7 @@ type alias State node =
     , zipper : Zipper node
     , indentationQuantum : Quantum
     , indent : Int
+    , indentationChanges : List Int
     , level : Int
     , make : Block -> node
     , default : Zipper node
@@ -148,7 +153,7 @@ forestFromBlocks : a -> (Block -> a) -> (a -> Block) -> List Block -> Result Err
 forestFromBlocks defaultNode makeNode renderNode blocks =
     let
         quantum =
-            Blocks.quantumOfBlocks blocks
+            Blocks.quantumOfBlocks2 blocks
 
         blocks1 : List Block
         blocks1 =
@@ -212,11 +217,11 @@ getIndentationQuantum currentIndentatioQuantum blockIndentation =
                 currentIndentatioQuantum
 
         ConfirmedQuantum k ->
-            if blockIndentation == 0 then
-                ProvisionalQuantum 1
-
-            else
-                ConfirmedQuantum k
+            --if blockIndentation == 0 then
+            --    ProvisionalQuantum 1
+            --
+            --else
+            ConfirmedQuantum k
 
 
 handleEQ : Int -> Block -> State node -> State node
@@ -229,7 +234,7 @@ handleEQ indent block state =
         | blocks = List.drop 1 state.blocks
         , indent = indent
         , zipper = attachAtFocus newTree state.zipper
-        , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
+        , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent |> Debug.log "Q, EQ"
     }
 
 
@@ -246,8 +251,9 @@ handleGT indent block state =
                 | blocks = List.drop 1 state.blocks
                 , indent = indent
                 , level = state.level + 1
+                , indentationChanges = block.indent :: state.indentationChanges
                 , zipper = attachAtFocus newTree state.zipper
-                , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
+                , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent |> Debug.log "Q, GT (1)"
             }
 
         Just newZipper ->
@@ -255,8 +261,9 @@ handleGT indent block state =
                 | blocks = List.drop 1 state.blocks
                 , indent = indent
                 , level = state.level + 1
+                , indentationChanges = block.indent :: state.indentationChanges
                 , zipper = attachAtFocus newTree newZipper
-                , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
+                , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent |> Debug.log "Q, GT (2)"
             }
 
 
@@ -266,15 +273,48 @@ handleLT indent block state =
         newTree =
             Tree.tree (state.make block) []
 
+        deltaInfo =
+            popUntil (state.indent - indent) state.indentationChanges
+
         deltaLevel =
-            (state.indent - indent) // quantumValue state.indentationQuantum
+            deltaInfo.popped
     in
     { state
         | blocks = List.drop 1 state.blocks
         , indent = indent
+        , indentationChanges = deltaInfo.remaining
         , zipper = attachAtFocus newTree (repeat deltaLevel Zipper.parent state.zipper)
-        , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
+        , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent |> Debug.log "Q, LT"
     }
+
+
+{-|
+
+    > popUntil 5 [1,2,2,2]
+      { popped = 3, remaining = [2], sum = 5 }
+
+-}
+popUntil : Int -> List Int -> { sum : Int, popped : Int, remaining : List Int }
+popUntil goal input =
+    popUntilAux goal { sum = 0, popped = 0, remaining = input }
+
+
+popUntilAux : Int -> { sum : Int, popped : Int, remaining : List Int } -> { sum : Int, popped : Int, remaining : List Int }
+popUntilAux goal { sum, popped, remaining } =
+    case List.head remaining of
+        Nothing ->
+            { sum = sum, popped = popped, remaining = remaining }
+
+        Just k ->
+            let
+                newSum =
+                    sum + k
+            in
+            if newSum < goal then
+                popUntilAux goal { sum = newSum, popped = popped + 1, remaining = List.drop 1 remaining }
+
+            else
+                { sum = newSum, popped = popped + 1, remaining = List.drop 1 remaining }
 
 
 
