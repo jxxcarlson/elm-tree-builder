@@ -67,7 +67,7 @@ init defaultNode makeNode blocks =
 
         Just rootBlock ->
             Ok
-                { blocks = List.drop 1 (blocks |> Debug.log "BLOCKS")
+                { blocks = List.drop 1 blocks
                 , zipper = Zipper.fromTree <| Tree.tree (makeNode rootBlock) []
                 , indentationQuantum = ProvisionalQuantum 1
                 , indent = 0
@@ -234,7 +234,8 @@ handleEQ indent block state =
         | blocks = List.drop 1 state.blocks
         , indent = indent
         , zipper = attachAtFocus newTree state.zipper
-        , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent |> Debug.log "Q, EQ"
+
+        --, indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
     }
 
 
@@ -251,9 +252,10 @@ handleGT indent block state =
                 | blocks = List.drop 1 state.blocks
                 , indent = indent
                 , level = state.level + 1
-                , indentationChanges = block.indent :: state.indentationChanges
+                , indentationChanges = pushIndentationChange block.indent state.indentationChanges
                 , zipper = attachAtFocus newTree state.zipper
-                , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent |> Debug.log "Q, GT (1)"
+
+                --, indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
             }
 
         Just newZipper ->
@@ -261,10 +263,16 @@ handleGT indent block state =
                 | blocks = List.drop 1 state.blocks
                 , indent = indent
                 , level = state.level + 1
-                , indentationChanges = block.indent :: state.indentationChanges
+                , indentationChanges = pushIndentationChange block.indent state.indentationChanges
                 , zipper = attachAtFocus newTree newZipper
-                , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent |> Debug.log "Q, GT (2)"
+
+                --, indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
             }
+
+
+pushIndentationChange : Int -> List Int -> List Int
+pushIndentationChange k ks =
+    (k - List.sum ks) :: ks
 
 
 handleLT : Int -> Block -> State node -> State node
@@ -282,9 +290,11 @@ handleLT indent block state =
     { state
         | blocks = List.drop 1 state.blocks
         , indent = indent
+        , level = state.level - deltaLevel
         , indentationChanges = deltaInfo.remaining
         , zipper = attachAtFocus newTree (repeat deltaLevel Zipper.parent state.zipper)
-        , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent |> Debug.log "Q, LT"
+
+        -- , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
     }
 
 
