@@ -1,7 +1,4 @@
-module Tree.Build exposing
-    ( fromString, fromBlocks, forestFromString, forestFromBlocks, Error(..)
-    , popUntil
-    )
+module Tree.Build exposing (fromString, fromBlocks, forestFromString, forestFromBlocks, Error(..))
 
 {-| This module provides tools for building
 a tree from a string or a list of blocks. As noted
@@ -38,11 +35,6 @@ Therefore
 
 has the correct type. Here we use the representation of rose trees found in
 [elm/rose-tree](https://package.elm-lang.org/packages/zwilias/elm-rosetree/latest/).
-
-**Note.** The build functions described here here make a guess as to what the "quantum of indentation"
-is. The quantum of indentation is the largest integer Q such that all lines are indented
-by some multiple of Q. The guess used is either 1 or the number of leading spaces in the first
-line that has leading spaces.
 
 @docs fromString, fromBlocks, forestFromString, forestFromBlocks, Error
 
@@ -151,7 +143,7 @@ forestFromBlocks : a -> (Block -> a) -> (a -> Block) -> List Block -> Result Err
 forestFromBlocks defaultNode makeNode renderNode blocks =
     let
         quantum =
-            Blocks.quantumOfBlocks2 blocks
+            Blocks.quantumOfBlocks blocks
 
         blocks1 : List Block
         blocks1 =

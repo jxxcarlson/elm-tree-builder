@@ -1,7 +1,4 @@
-module Tree.Blocks exposing
-    ( Block, fromStringAsLines, fromStringAsParagraphs, make, quantumOfBlocks, wellFormed
-    , quantumOfBlocks2
-    )
+module Tree.Blocks exposing (Block, fromStringAsLines, fromStringAsParagraphs, make, quantumOfBlocks, wellFormed)
 
 {-| This module provides tools for converting text into a list of blocks, where
 
@@ -73,6 +70,7 @@ quantumOfBlocks blocks =
     blocks |> List.map .indent |> differences |> List.filter (\n -> n > 0) |> Math.gcdList
 
 
+{-| -}
 quantumOfBlocks2 : List Block -> Int
 quantumOfBlocks2 blocks =
     blocks |> List.map .indent |> differences |> List.filter (\n -> n > 0) |> List.head |> Maybe.withDefault 1
