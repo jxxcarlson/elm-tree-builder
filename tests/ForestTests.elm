@@ -6,18 +6,26 @@ import Tree.Build as Build
 import Tree.Test as T
 
 
+stringToBlock str =
+    { content = str, indent = 0 }
+
+
+blockToString block =
+    block.content
+
+
 testItem : Int -> String -> String -> Test
 testItem quantum label str =
     test label <|
         \_ ->
-            T.forestTest quantum "?" identity identity str |> Expect.equal "Ok"
+            T.forestTest quantum "?" stringToBlock blockToString str |> Expect.equal "Ok"
 
 
 testForestNumber : Int -> String -> String -> Test
 testForestNumber expectedNumber label str =
     test label <|
         \_ ->
-            Build.forestFromString "?" identity identity str |> Result.map List.length |> Expect.equal (Ok expectedNumber)
+            Build.forestFromString "?" blockToString stringToBlock str |> Result.map List.length |> Expect.equal (Ok expectedNumber)
 
 
 suite : Test

@@ -68,8 +68,8 @@ init flags =
       , seed = Random.initialSeed flags.seed |> Debug.log "SEED2"
       , message = ""
       , lineNumber = 0
-      , graph = Result.map (Tree.Render.toGraph (preferences initialAperture) identity) (Build.fromString "?" identity initialGraphString)
-      , tree = Build.fromString "?" identity initialGraphString
+      , graph = Result.map (Tree.Render.toGraph (preferences initialAperture) identity) (Build.fromString "?" .content initialGraphString)
+      , tree = Build.fromString "?" .content initialGraphString
       , labelStyle = Tree.Svg.NoLabel
       , aperture = initialAperture
       }
@@ -102,7 +102,7 @@ update msg model =
         InputText t ->
             let
                 tree_ =
-                    Build.fromString "?" identity t
+                    Build.fromString "?" .content t
             in
             ( { model
                 | sourceText = t
@@ -132,8 +132,8 @@ update msg model =
         TreeLoaded content ->
             ( { model
                 | sourceText = content
-                , graph = Result.map (Tree.Render.toGraph (preferences model.aperture) identity) (Build.fromString "?" identity content)
-                , tree = Build.fromString "?" identity content
+                , graph = Result.map (Tree.Render.toGraph (preferences model.aperture) identity) (Build.fromString "?" .content content)
+                , tree = Build.fromString "?" .content content
               }
             , Cmd.none
             )
@@ -153,7 +153,7 @@ update msg model =
                     Tree.Random.generateOutline numberOfNodes randomNumber
 
                 tree =
-                    Build.fromString "?" identity sourceText
+                    Build.fromString "?" .content sourceText
 
                 graph =
                     Result.map (Tree.Render.toGraph (preferences model.aperture) identity) tree

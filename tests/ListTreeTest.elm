@@ -5,11 +5,19 @@ import Test exposing (Test, describe, test)
 import Tree.Test as T
 
 
+stringToBlock str =
+    { content = str, indent = 0 }
+
+
+blockToString block =
+    block.content
+
+
 testItem : String -> String -> Test
 testItem label str =
     test label <|
         \_ ->
-            T.test 1 "?" identity identity (String.trim str) |> Expect.equal "Ok"
+            T.test 1 "?" stringToBlock blockToString (String.trim str) |> Expect.equal "Ok"
 
 
 renderNode : List Int -> String

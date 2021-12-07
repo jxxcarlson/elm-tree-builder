@@ -8,11 +8,19 @@ import Tree.Random
 import Tree.Test as T
 
 
+stringToBlock str =
+    { content = str, indent = 0 }
+
+
+blockToString block =
+    block.content
+
+
 testItem : String -> String -> Test
 testItem label str =
     test label <|
         \_ ->
-            T.test 1 "?" identity identity str |> Expect.equal "Ok"
+            T.test 1 "?" stringToBlock blockToString str |> Expect.equal "Ok"
 
 
 fuzzTest nodes label =
@@ -29,7 +37,7 @@ fuzzTestAux maxCount seed =
         ( quantum, _ ) =
             outline |> Blocks.fromStringAsLines |> Blocks.wellFormed
     in
-    T.test quantum "?" identity identity outline
+    T.test quantum "?" stringToBlock blockToString outline
 
 
 suite : Test
