@@ -2,6 +2,7 @@ module Tree.Example.Block exposing (..)
 
 import Tree.Blocks as Blocks
 import Tree.BlocksV as BlocksV
+import Tree.Build as Build
 
 
 data =
@@ -42,3 +43,11 @@ aaa
 
 blocks =
     BlocksV.fromStringAsParagraphs myVerbatimLine data2
+
+
+tree =
+    Build.fromBlocks "?" identity blocks
+
+
+forest =
+    Build.forestFromBlocks "?" identity identity blocks
