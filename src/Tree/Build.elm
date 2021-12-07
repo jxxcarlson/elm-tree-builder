@@ -69,7 +69,6 @@ init defaultNode makeNode blocks =
             Ok
                 { blocks = List.drop 1 blocks
                 , zipper = Zipper.fromTree <| Tree.tree (makeNode rootBlock) []
-                , indentationQuantum = ProvisionalQuantum 1
                 , indent = 0
                 , level = 0
                 , indentationChanges = []
@@ -81,7 +80,6 @@ init defaultNode makeNode blocks =
 type alias State node =
     { blocks : List Block
     , zipper : Zipper node
-    , indentationQuantum : Quantum
     , indent : Int
     , indentationChanges : List Int
     , level : Int
@@ -207,23 +205,6 @@ loop s f =
 -- HANDLERS
 
 
-getIndentationQuantum currentIndentatioQuantum blockIndentation =
-    case currentIndentatioQuantum of
-        ProvisionalQuantum _ ->
-            if blockIndentation > 0 then
-                ConfirmedQuantum blockIndentation
-
-            else
-                currentIndentatioQuantum
-
-        ConfirmedQuantum k ->
-            --if blockIndentation == 0 then
-            --    ProvisionalQuantum 1
-            --
-            --else
-            ConfirmedQuantum k
-
-
 handleEQ : Int -> Block -> State node -> State node
 handleEQ indent block state =
     let
@@ -234,8 +215,6 @@ handleEQ indent block state =
         | blocks = List.drop 1 state.blocks
         , indent = indent
         , zipper = attachAtFocus newTree state.zipper
-
-        --, indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
     }
 
 
@@ -254,8 +233,6 @@ handleGT indent block state =
                 , level = state.level + 1
                 , indentationChanges = pushIndentationChange block.indent state.indentationChanges
                 , zipper = attachAtFocus newTree state.zipper
-
-                --, indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
             }
 
         Just newZipper ->
@@ -265,8 +242,6 @@ handleGT indent block state =
                 , level = state.level + 1
                 , indentationChanges = pushIndentationChange block.indent state.indentationChanges
                 , zipper = attachAtFocus newTree newZipper
-
-                --, indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
             }
 
 
