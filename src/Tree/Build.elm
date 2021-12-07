@@ -36,6 +36,11 @@ Therefore
 has the correct type. Here we use the representation of rose trees found in
 [elm/rose-tree](https://package.elm-lang.org/packages/zwilias/elm-rosetree/latest/).
 
+**Note.** The build functions described here here make a guess as to what the "quantum of indentation"
+is. The quantum of indentation is the largest integer Q such that all lines are indented
+by some multiple of Q. The guess used is either 1 or the number of leading spaces in the first
+line that has leading spaces.
+
 @docs fromString, fromBlocks, forestFromString, forestFromBlocks, Error
 
 -}
@@ -58,34 +63,41 @@ init defaultNode makeNode blocks =
             Err EmptyBlocks
 
         Just rootBlock ->
-            let
-                ( quantum, wellFormed ) =
-                    Blocks.wellFormed blocks
-            in
-            if wellFormed == False then
-                Err BlocksNotWellFormed
-
-            else
-                Ok
-                    { blocks = List.drop 1 blocks
-                    , zipper = Zipper.fromTree <| Tree.tree (makeNode rootBlock) []
-                    , indentationQuantum = quantum
-                    , indent = 0
-                    , level = 0
-                    , make = makeNode
-                    , default = Zipper.fromTree (Tree.tree defaultNode [])
-                    }
+            Ok
+                { blocks = List.drop 1 blocks
+                , zipper = Zipper.fromTree <| Tree.tree (makeNode rootBlock) []
+                , indentationQuantum = ProvisionalQuantum 1
+                , indent = 0
+                , level = 0
+                , make = makeNode
+                , default = Zipper.fromTree (Tree.tree defaultNode [])
+                }
 
 
 type alias State node =
     { blocks : List Block
     , zipper : Zipper node
-    , indentationQuantum : Int
+    , indentationQuantum : Quantum
     , indent : Int
     , level : Int
     , make : Block -> node
     , default : Zipper node
     }
+
+
+type Quantum
+    = ProvisionalQuantum Int
+    | ConfirmedQuantum Int
+
+
+quantumValue : Quantum -> Int
+quantumValue quantum =
+    case quantum of
+        ProvisionalQuantum k ->
+            k
+
+        ConfirmedQuantum k ->
+            k
 
 
 {-| -}
@@ -190,6 +202,19 @@ loop s f =
 -- HANDLERS
 
 
+getIndentationQuantum currentIndentatioQuantum blockIndentation =
+    case currentIndentatioQuantum of
+        ProvisionalQuantum _ ->
+            if blockIndentation > 0 then
+                ConfirmedQuantum blockIndentation
+
+            else
+                currentIndentatioQuantum
+
+        ConfirmedQuantum k ->
+            ConfirmedQuantum k
+
+
 handleEQ : Int -> Block -> State node -> State node
 handleEQ indent block state =
     let
@@ -200,6 +225,7 @@ handleEQ indent block state =
         | blocks = List.drop 1 state.blocks
         , indent = indent
         , zipper = attachAtFocus newTree state.zipper
+        , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
     }
 
 
@@ -217,6 +243,7 @@ handleGT indent block state =
                 , indent = indent
                 , level = state.level + 1
                 , zipper = attachAtFocus newTree state.zipper
+                , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
             }
 
         Just newZipper ->
@@ -225,6 +252,7 @@ handleGT indent block state =
                 , indent = indent
                 , level = state.level + 1
                 , zipper = attachAtFocus newTree newZipper
+                , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
             }
 
 
@@ -235,12 +263,13 @@ handleLT indent block state =
             Tree.tree (state.make block) []
 
         deltaLevel =
-            (state.indent - indent) // state.indentationQuantum
+            (state.indent - indent) // quantumValue state.indentationQuantum
     in
     { state
         | blocks = List.drop 1 state.blocks
         , indent = indent
         , zipper = attachAtFocus newTree (repeat deltaLevel Zipper.parent state.zipper)
+        , indentationQuantum = getIndentationQuantum state.indentationQuantum block.indent
     }
 
 
