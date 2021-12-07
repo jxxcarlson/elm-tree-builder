@@ -212,7 +212,11 @@ getIndentationQuantum currentIndentatioQuantum blockIndentation =
                 currentIndentatioQuantum
 
         ConfirmedQuantum k ->
-            ConfirmedQuantum k
+            if blockIndentation == 0 then
+                ProvisionalQuantum 1
+
+            else
+                ConfirmedQuantum k
 
 
 handleEQ : Int -> Block -> State node -> State node
