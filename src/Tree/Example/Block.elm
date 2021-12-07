@@ -1,6 +1,7 @@
 module Tree.Example.Block exposing (..)
 
 import Tree.Blocks as Blocks
+import Tree.BlocksV as BlocksV
 
 
 data =
@@ -17,5 +18,27 @@ I repeat: a test.
 """
 
 
+myVerbatimLine : String -> Bool
+myVerbatimLine str =
+    String.left 2 str == "||"
+
+
+data2 =
+    """
+one
+two
+
+|| code
+aaa
+  bbb
+    ccc
+    ddd
+
+
+  More stuff
+  and still more
+"""
+
+
 blocks =
-    Blocks.fromStringAsParagraphs data
+    BlocksV.fromStringAsParagraphs myVerbatimLine data2
