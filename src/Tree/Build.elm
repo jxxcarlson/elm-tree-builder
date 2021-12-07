@@ -34,7 +34,7 @@ type Error
     | BlocksNotWellFormed
 
 
-init : node -> (String -> node) -> List Block -> Result Error (State node)
+init : node -> (Block -> node) -> List Block -> Result Error (State node)
 init defaultNode makeNode blocks =
     case List.head blocks of
         Nothing ->
@@ -51,7 +51,7 @@ init defaultNode makeNode blocks =
             else
                 Ok
                     { blocks = List.drop 1 blocks
-                    , zipper = Zipper.fromTree <| Tree.tree (makeNode rootBlock.content) []
+                    , zipper = Zipper.fromTree <| Tree.tree (makeNode rootBlock) []
                     , indentationQuantum = quantum
                     , indent = 0
                     , level = 0
@@ -66,13 +66,13 @@ type alias State node =
     , indentationQuantum : Int
     , indent : Int
     , level : Int
-    , make : String -> node
+    , make : Block -> node
     , default : Zipper node
     }
 
 
 {-| -}
-fromBlocks : node -> (String -> node) -> List Block -> Result Error (Tree node)
+fromBlocks : node -> (Block -> node) -> List Block -> Result Error (Tree node)
 fromBlocks defaultNode makeNode blocks =
     case init defaultNode makeNode blocks of
         Err error ->
@@ -82,8 +82,13 @@ fromBlocks defaultNode makeNode blocks =
             Ok <| loop initialState nextStep
 
 
-{-| -}
-fromString : node -> (String -> node) -> String -> Result Error (Tree node)
+{-|
+
+    > Build.fromString "?" .content "1\n 2\n 3"
+      Ok (Tree "1" [Tree "2" [],Tree "3" []])
+
+-}
+fromString : node -> (Block -> node) -> String -> Result Error (Tree node)
 fromString defaultNode makeNode str =
     str
         |> Blocks.fromStringAsLines
@@ -92,14 +97,11 @@ fromString defaultNode makeNode str =
 
 {-| Example:
 
-    > forestFromString "?" identity identity "1\n 2\n 3"
-      Ok [Tree "1" [Tree "2" [],Tree "3" []]]
-
-    > forestFromString "?" identity identity "1\n 2\n 3\n4\n 5\n 6"
-    Ok [Tree "1" [Tree "2" [],Tree "3" []],Tree "4" [Tree "5" [],Tree "6" []]]
+    > Build.forestFromString "?" .content (\str -> {indent = 0, content = str}) "1\n 2\n 3\na\n b\n c"
+      Ok [Tree "1" [Tree "2" [],Tree "3" []],Tree "a" [Tree "b" [],Tree "c" []]]
 
 -}
-forestFromString : a -> (String -> a) -> (a -> String) -> String -> Result Error (List (Tree a))
+forestFromString : a -> (Block -> a) -> (a -> Block) -> String -> Result Error (List (Tree a))
 forestFromString defaultNode makeNode renderNode str =
     str
         |> Blocks.fromStringAsLines
@@ -107,7 +109,7 @@ forestFromString defaultNode makeNode renderNode str =
 
 
 {-| -}
-forestFromBlocks : a -> (String -> a) -> (a -> String) -> List Block -> Result Error (List (Tree a))
+forestFromBlocks : a -> (Block -> a) -> (a -> Block) -> List Block -> Result Error (List (Tree a))
 forestFromBlocks defaultNode makeNode renderNode blocks =
     let
         quantum =
@@ -119,7 +121,7 @@ forestFromBlocks defaultNode makeNode renderNode blocks =
 
         blocks2 : List Block
         blocks2 =
-            { content = renderNode defaultNode, indent = 0 } :: blocks1
+            renderNode defaultNode :: blocks1
     in
     fromBlocks defaultNode makeNode blocks2 |> Result.map Tree.children
 
@@ -137,13 +139,13 @@ nextStep state =
         Just block ->
             case compare block.indent state.indent of
                 GT ->
-                    Loop <| handleGT block.indent block.content state
+                    Loop <| handleGT block.indent block state
 
                 EQ ->
-                    Loop <| handleEQ block.indent block.content state
+                    Loop <| handleEQ block.indent block state
 
                 LT ->
-                    Loop <| handleLT block.indent block.content state
+                    Loop <| handleLT block.indent block state
 
 
 type Step state a
@@ -165,10 +167,11 @@ loop s f =
 -- HANDLERS
 
 
-handleEQ indent content state =
+handleEQ : Int -> Block -> State node -> State node
+handleEQ indent block state =
     let
         newTree =
-            Tree.tree (state.make content) []
+            Tree.tree (state.make block) []
     in
     { state
         | blocks = List.drop 1 state.blocks
@@ -177,10 +180,11 @@ handleEQ indent content state =
     }
 
 
-handleGT indent content state =
+handleGT : Int -> Block -> State node -> State node
+handleGT indent block state =
     let
         newTree =
-            Tree.tree (state.make content) []
+            Tree.tree (state.make block) []
     in
     case Zipper.lastChild state.zipper of
         Nothing ->
@@ -201,10 +205,11 @@ handleGT indent content state =
             }
 
 
-handleLT indent content state =
+handleLT : Int -> Block -> State node -> State node
+handleLT indent block state =
     let
         newTree =
-            Tree.tree (state.make content) []
+            Tree.tree (state.make block) []
 
         deltaLevel =
             (state.indent - indent) // state.indentationQuantum
