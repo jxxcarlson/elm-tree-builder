@@ -19,7 +19,7 @@ and with given seed.
 generate : Int -> Int -> Result Error (Tree String)
 generate maxNodes seed =
     generateOutline maxNodes seed
-        |> Build.fromString "?" identity
+        |> Build.fromString "?" .content
 
 
 {-| Generate a random outline.
