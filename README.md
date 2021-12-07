@@ -1,6 +1,6 @@
 # Tree Builder
 
-Tools for building a tree from a string or a list of blocks
+This package provides tools for building a tree from a string or a list of blocks
 as well as some other tools:
 
 - Tree.Blocks: transform a string into a list of blocks
