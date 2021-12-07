@@ -118,10 +118,9 @@ nextStep state =
             }
 
 
-{-|
-
-    depths k n seed:  generate n random trees of k nodes using the given seed
-    and collect statistics on their depths
+{-| depths k n seed: generate n random trees of k nodes
+using the given seed and collect statistics
+on their depths
 
     > depths 10 10 0
     [(2,1),(3,2),(4,3),(5,2),(8,2)] -- one tree of depth two, two trees of depth three, etc.

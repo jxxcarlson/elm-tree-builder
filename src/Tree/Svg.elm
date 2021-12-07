@@ -3,15 +3,16 @@ module Tree.Svg exposing (LabelStyle(..), render, transform)
 {-| Helper functions for rendering trees:
 
     import Tree.Build
-    import Tree.Transform
+    import Tree.Render
 
     -- Build the tree from text
     tree =
-        Tree.Build.fromString "?" identity "1\n 2\n 3\n 4\n"
+        Tree.Build.fromString "?" .content "1\n 2\n 3\n 4\n"
 
     -- Build the graph
     graph =
-        Result.map (Tree.Transform.toGraph preferences identity) tree |> Result.withDefault []
+        Result.map (Tree.Render.toGraph preferences identity)
+          tree |> Result.withDefault []
 
 
     -- Render the graph.  The first argument is the label style.
@@ -33,7 +34,8 @@ type LabelStyle
     | FirstWord
 
 
-{-| Transform: shift by (dx, dy) and rescale by (sx,sy,sr)
+{-| Transform: shift by dx, dy and rescale by sx,sy,sr where the
+arguments are dx, dy, sx, sy, sr, graph
 -}
 transform : Float -> Float -> Float -> Float -> Float -> Graph -> Graph
 transform dx dy sx sy sr graph =

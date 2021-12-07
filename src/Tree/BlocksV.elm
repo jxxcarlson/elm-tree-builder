@@ -3,11 +3,14 @@ module Tree.BlocksV exposing (Block, fromStringAsLines, fromStringAsParagraphs, 
 {-| This module is like Tree.Blocks, except that if the first line of a block
 is deemed to signal the beginning of a "verbatim block," all succeeding lines will be
 incorporated in it, so long as their indentation level is greater than or equal to the
-indentation level of the first line. To make this work function fromStringAsParagraphs requires an additional argument:
+indentation level of the first line. To make this work, function fromStringAsParagraphs requires an additional argument:
 
-    fromStringAsParagraphs : (String -> Bool) -> String -> List Block
+    fromStringAsParagraphs :
+        (String -> Bool)
+        -> String
+        -> List Block
 
-The first argument is a predicate which determines whether a line to be
+The additional argument is a predicate which determines whether a line to be
 considered the first line of a verbatim blck.
 
 @docs Block, fromStringAsLines, fromStringAsParagraphs, make, quantumOfBlocks, wellFormed
