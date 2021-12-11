@@ -4,12 +4,13 @@ import Expect
 import Fuzz
 import Test exposing (Test, describe, fuzz2, test)
 import Tree.Blocks as Blocks
+import Tree.BlocksV as BlocksV
 import Tree.Random
 import Tree.Test as T
 
 
 stringToBlock str =
-    { content = str, indent = 0 }
+    { content = str, indent = 0, lineNumber = 0 }
 
 
 blockToString block =
@@ -35,7 +36,7 @@ fuzzTestAux maxCount seed =
             Tree.Random.generateOutline maxCount seed
 
         ( quantum, _ ) =
-            outline |> Blocks.fromStringAsLines |> Blocks.wellFormed
+            outline |> Blocks.fromStringAsLines |> BlocksV.wellFormed
     in
     T.test quantum "?" stringToBlock blockToString outline
 

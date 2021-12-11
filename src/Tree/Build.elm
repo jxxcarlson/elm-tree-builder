@@ -42,6 +42,7 @@ has the correct type. Here we use the representation of rose trees found in
 
 import Tree exposing (Tree)
 import Tree.Blocks as Blocks exposing (Block)
+import Tree.BlocksV as BlocksV
 import Tree.Zipper as Zipper exposing (Zipper)
 
 
@@ -143,7 +144,7 @@ forestFromBlocks : a -> (Block -> a) -> (a -> Block) -> List Block -> Result Err
 forestFromBlocks defaultNode makeNode renderNode blocks =
     let
         quantum =
-            Blocks.quantumOfBlocks blocks
+            BlocksV.quantumOfBlocks blocks
 
         blocks1 : List Block
         blocks1 =

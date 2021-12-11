@@ -1,4 +1,7 @@
-module Tree.BlocksV exposing (Block, fromStringAsLines, fromStringAsParagraphs, make)
+module Tree.BlocksV exposing
+    ( Block, fromStringAsLines, fromStringAsParagraphs, make
+    , quantumOfBlocks, wellFormed
+    )
 
 {-| This module is like Tree.Blocks, except that if the first line of a block
 is deemed to signal the beginning of a "verbatim block," all succeeding lines will be
