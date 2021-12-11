@@ -24,6 +24,7 @@ import Tree.Math as Math
 {-| -}
 type alias Block =
     { indent : Int
+    , lineNumber : Int
     , content : String
     }
 
@@ -66,14 +67,13 @@ wellFormed blocks =
     ( quantum, List.length outliers == 0 )
 
 
-{-| -}
 fromStringAsLines : String -> List Block
 fromStringAsLines str =
     str
         |> String.trim
         |> String.lines
         |> List.filter (\line -> String.left 1 line /= "#")
-        |> List.map (\line -> Line.classify line)
+        |> List.indexedMap (\k line -> Line.classify k line)
 
 
 {-| -}
@@ -91,9 +91,10 @@ make isVerbatimLine lines =
 init : (String -> Bool) -> List String -> State
 init isVerbatimLine lines =
     { blocks = []
-    , currentBlock = List.head lines |> Maybe.map Line.classify
+    , currentBlock = List.head lines |> Maybe.map (Line.classify 0)
     , lines = List.drop 1 lines
     , indent = 0
+    , lineNumber = -1
     , inVerbatim = False
     , isVerbatimLine = isVerbatimLine
     }
@@ -104,6 +105,7 @@ type alias State =
     , currentBlock : Maybe Block
     , lines : List String
     , indent : Int
+    , lineNumber : Int
     , inVerbatim : Bool
     , isVerbatimLine : String -> Bool
     }
@@ -123,7 +125,8 @@ nextStep state =
         Just rawLine ->
             let
                 currentLine =
-                    Line.classify rawLine
+                    -- TODO: the below is wrong
+                    Line.classify (state.lineNumber + 1) rawLine
             in
             case compare currentLine.indent state.indent of
                 GT ->
@@ -154,6 +157,7 @@ handleGT currentLine state =
                 in
                 { state
                     | lines = List.drop 1 state.lines
+                    , lineNumber = state.lineNumber + 1
                     , currentBlock = Just { block | content = block.content ++ "\n" ++ leadingSpaces ++ currentLine.content }
                 }
 
@@ -161,9 +165,10 @@ handleGT currentLine state =
                 -- make new block
                 { state
                     | lines = List.drop 1 state.lines
+                    , lineNumber = state.lineNumber + 1
                     , indent = currentLine.indent
                     , blocks = block :: state.blocks
-                    , currentBlock = Just currentLine
+                    , currentBlock = Just currentLine |> Debug.log "GT, currentBLOCK"
                 }
 
 
@@ -177,6 +182,7 @@ handleEQ currentLine state =
                 -- make new block and reset inVerbatim
                 { state
                     | lines = List.drop 1 state.lines
+                    , lineNumber = state.lineNumber + 1
                     , indent = currentLine.indent
                     , blocks = block :: state.blocks
                     , inVerbatim = state.isVerbatimLine currentLine.content
@@ -187,6 +193,7 @@ handleEQ currentLine state =
                 -- add the current line to the block and keep the indentation level
                 { state
                     | lines = List.drop 1 state.lines
+                    , lineNumber = state.lineNumber + 1
                     , inVerbatim = True
 
                     --, indent = currentLine.indent
@@ -197,6 +204,7 @@ handleEQ currentLine state =
                 -- add the current line to the block
                 { state
                     | lines = List.drop 1 state.lines
+                    , lineNumber = state.lineNumber + 1
                     , indent = currentLine.indent
                     , currentBlock = Just { block | content = block.content ++ "\n" ++ currentLine.content }
                 }
@@ -207,12 +215,14 @@ handleLT currentLine state =
         Nothing ->
             { state
                 | lines = List.drop 1 state.lines
+                , lineNumber = state.lineNumber + 1
                 , indent = currentLine.indent
             }
 
         Just block ->
             { state
                 | lines = List.drop 1 state.lines
+                , lineNumber = state.lineNumber + 1
                 , indent = currentLine.indent
                 , blocks = block :: state.blocks
                 , currentBlock = Just currentLine
