@@ -17,7 +17,7 @@ considered the first line of a verbatim blck.
 
 -}
 
-import Tree.Line as Line
+import Tree.Line as Line exposing (Line)
 import Tree.Math as Math
 
 
@@ -25,6 +25,7 @@ import Tree.Math as Math
 type alias Block =
     { indent : Int
     , lineNumber : Int
+    , numberOfLines : Int
     , content : String
     }
 
@@ -75,7 +76,8 @@ fromStringAsLines str =
         |> String.trim
         |> String.lines
         |> List.filter (\line -> String.left 1 line /= "#")
-        |> List.indexedMap (\k line -> Line.classify k line)
+        -- TODO: Big error below
+        |> List.indexedMap (\k line -> Line.classify k line |> lineToBlock 1)
 
 
 {-| -}
@@ -93,13 +95,18 @@ make isVerbatimLine lines =
 init : (String -> Bool) -> List String -> State
 init isVerbatimLine lines =
     { blocks = []
-    , currentBlock = List.head lines |> Maybe.map (Line.classify 0)
+    , currentBlock = List.head lines |> Maybe.map (Line.classify 0 >> lineToBlock 0)
     , lines = List.drop 1 lines
     , indent = 0
     , lineNumber = 0
     , inVerbatim = False
     , isVerbatimLine = isVerbatimLine
     }
+
+
+lineToBlock : Int -> Line -> Block
+lineToBlock numberOfLines { indent, content, lineNumber } =
+    { indent = indent, content = content, lineNumber = lineNumber, numberOfLines = numberOfLines }
 
 
 type alias State =
@@ -132,13 +139,13 @@ nextStep state =
             in
             case compare currentLine.indent state.indent of
                 GT ->
-                    Loop <| handleGT currentLine state
+                    Loop <| handleGT (currentLine |> lineToBlock state.lineNumber) state
 
                 EQ ->
-                    Loop <| handleEQ currentLine state
+                    Loop <| handleEQ (currentLine |> lineToBlock state.lineNumber) state
 
                 LT ->
-                    Loop <| handleLT currentLine state
+                    Loop <| handleLT (currentLine |> lineToBlock state.lineNumber) state
 
 
 indentationOf k =
@@ -160,7 +167,12 @@ handleGT currentLine state =
                 { state
                     | lines = List.drop 1 state.lines
                     , lineNumber = state.lineNumber + 1
-                    , currentBlock = Just { block | content = block.content ++ "\n" ++ leadingSpaces ++ currentLine.content }
+                    , currentBlock =
+                        Just
+                            { block
+                                | content = block.content ++ "\n" ++ leadingSpaces ++ currentLine.content
+                                , numberOfLines = state.lineNumber + 2 - block.lineNumber
+                            }
                 }
 
             else
@@ -199,7 +211,12 @@ handleEQ currentLine state =
                     , inVerbatim = True
 
                     --, indent = currentLine.indent
-                    , currentBlock = Just { block | content = block.content ++ "\n" ++ currentLine.content }
+                    , currentBlock =
+                        Just
+                            { block
+                                | content = block.content ++ "\n" ++ currentLine.content
+                                , numberOfLines = state.lineNumber + 2 - block.lineNumber
+                            }
                 }
 
             else
@@ -208,7 +225,12 @@ handleEQ currentLine state =
                     | lines = List.drop 1 state.lines
                     , lineNumber = state.lineNumber + 1
                     , indent = currentLine.indent
-                    , currentBlock = Just { block | content = block.content ++ "\n" ++ currentLine.content }
+                    , currentBlock =
+                        Just
+                            { block
+                                | content = block.content ++ "\n" ++ currentLine.content
+                                , numberOfLines = state.lineNumber + 2 - block.lineNumber
+                            }
                 }
 
 

@@ -7,7 +7,7 @@ import Tree.Test as T
 
 
 stringToBlock str =
-    { content = str, indent = 0, lineNumber = 0 }
+    { content = str, indent = 0, lineNumber = 0, numberOfLines = 0 }
 
 
 blockToString block =
