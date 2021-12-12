@@ -1,3 +1,5 @@
 scripts:
   
   loc: cloc --by-file src
+
+  docs: npx elm-doc-preview

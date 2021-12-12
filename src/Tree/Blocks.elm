@@ -11,15 +11,21 @@ Lists of blocks are used by the functions in Tree.Build to construct trees
 form text. Here are some examples:
 
         > fromStringAsLines "one\n  two\n    three"
-          [   { content = "one", indent = 0 }
-            , { content = "two", indent = 2 }
-            , { content = "three", indent = 4 }
+         [ { content = "one\nho ho ho!"
+            , indent = 0, lineNumber = 0 }
+          ,{ content = "two\nha ha ha!"
+            , indent = 2, lineNumber = 1 }
+         ]
+
+        > fromStringAsParagraphs "one\n\two\nthree\n\n  ha ha ha!"
+          [{ content = "one\n\two\nthree"
+            , indent = 0, lineNumber = 0 }
+          ,{ content = "ha ha ha!"
+           , indent = 2, lineNumber = 3 }
           ]
 
-        > fromStringAsParagraphs "one\nho ho ho!\n  two\n  ha ha ha!"
-          [   { content = "one\nho ho ho!", indent = 0 }
-            , { content = "two\nha ha ha!", indent = 2 }
-          ]
+The line number is the position of the first line of
+the text of the block in the source text.
 
 @docs Block, fromStringAsLines, fromStringAsParagraphs
 
@@ -28,7 +34,8 @@ form text. Here are some examples:
 import Tree.BlocksV as BlocksV
 
 
-{-| -}
+{-| Aliased from Tree.BlocksV
+-}
 type alias Block =
     BlocksV.Block
 

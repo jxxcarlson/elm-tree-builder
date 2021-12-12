@@ -5,7 +5,7 @@ as well as some other tools:
 
 - Tree.Blocks: transform a string into a list of blocks
 
-  - Tree.Build: the main module; build a tree from a string or a list  
+- Tree.Build: the main module; build a tree from a string or a list  
     of blocks.
 
 - Tree.Lib: preOrder, levelOrder, edges.  The latter transforms 
@@ -18,7 +18,7 @@ as well as some other tools:
   is a data structure which represents graphical image of a tree.
   It is used to render trees to Svg.
 
-- Tree.Svg: helper functions for rendering graphs.
+- Tree.Svg: functions for rendering a Graph to SVG.
 
 
 

@@ -35,10 +35,10 @@ fuzzTestAux maxCount seed =
         outline =
             Tree.Random.generateOutline maxCount seed
 
-        ( quantum, _ ) =
-            outline |> Blocks.fromStringAsLines |> BlocksV.wellFormed
+        blocks =
+            Blocks.fromStringAsLines outline
     in
-    T.test quantum "?" stringToBlock blockToString outline
+    T.test (BlocksV.quantumOfBlocks blocks) "?" stringToBlock blockToString outline
 
 
 suite : Test
