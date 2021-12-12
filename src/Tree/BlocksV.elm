@@ -96,7 +96,7 @@ init isVerbatimLine lines =
     , currentBlock = List.head lines |> Maybe.map (Line.classify 0)
     , lines = List.drop 1 lines
     , indent = 0
-    , lineNumber = -1
+    , lineNumber = 0
     , inVerbatim = False
     , isVerbatimLine = isVerbatimLine
     }

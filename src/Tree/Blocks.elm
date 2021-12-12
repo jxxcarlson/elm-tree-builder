@@ -5,6 +5,7 @@ module Tree.Blocks exposing (Block, fromStringAsLines, fromStringAsParagraphs)
         type alias Block =
             { indent : Int
             , content : String
+            , lineNumber : Int
             }
 
 Lists of blocks are used by the functions in Tree.Build to construct trees
