@@ -3,7 +3,7 @@
     "name": "jxxcarlson/elm-tree-builder",
     "summary": "Build rose trees from a string",
     "license": "BSD-3-Clause",
-    "version": "5.0.0",
+    "version": "6.0.0",
     "exposed-modules": [
         "Tree.Build",
         "Tree.Blocks",
